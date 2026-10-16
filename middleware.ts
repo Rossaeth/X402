@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { paymentProxy } from "@x402/next";
 import { createCdpFacilitatorClient } from "@coinbase/cdp-sdk/x402";
-import { HTTPFacilitatorClient, x402ResourceServer } from "@x402/core/server";
+import { HTTPFacilitatorClient, x402ResourceServer, type RoutesConfig } from "@x402/core/server";
 import { registerExactEvmScheme } from "@x402/evm/exact/server";
 import { registerExactSvmScheme } from "@x402/svm/exact/server";
 
@@ -94,7 +94,7 @@ function makeRouteConfig() {
         }
       }
     }];
-  }));
+  })) as unknown as RoutesConfig;
 }
 
 const routes = makeRouteConfig();
