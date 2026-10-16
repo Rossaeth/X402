@@ -100,13 +100,12 @@ function makeRouteConfig() {
 const routes = makeRouteConfig();
 let paidMiddleware: ((request: NextRequest) => Promise<Response> | Response) | null = null;
 if (routes) {
-  const payAiFacilitator = new HTTPFacilitatorClient({ url: FACILITATOR_URL });
   const hasCdpCredentials = Boolean(process.env.CDP_API_KEY_ID && process.env.CDP_API_KEY_SECRET);
-  // CDP gets first priority for networks it supports (currently Base); PayAI fills in other supported networks such as Solana.
-  const facilitators = hasCdpCredentials
-    ? [createCdpFacilitatorClient(), payAiFacilitator]
-    : [payAiFacilitator];
-  const server = new x402ResourceServer(facilitators);
+  // x402ResourceServer accepts one facilitator client. Prefer the authenticated CDP facilitator when configured; otherwise use PayAI.
+  const facilitator = hasCdpCredentials
+    ? createCdpFacilitatorClient()
+    : new HTTPFacilitatorClient({ url: FACILITATOR_URL });
+  const server = new x402ResourceServer(facilitator);
   if (BASE_PAY_TO) registerExactEvmScheme(server);
   if (SOLANA_PAY_TO) registerExactSvmScheme(server);
   paidMiddleware = paymentProxy(routes, server);
