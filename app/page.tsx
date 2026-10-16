@@ -13,19 +13,24 @@ const endpointGroups = [
     ],
   },
   {
+    title: "Institutional Issuers",
+    description: "Issuer directory and issuer-specific data routes. Live analysis requires a verified provider for each issuer.",
+    endpoints: [
+      { method: "GET", path: "/api/institutions/issuers", label: "ETF Issuer Directory", note: "List supported issuers and product examples." },
+      { method: "GET", path: "/api/institutions/blackrock", label: "BlackRock / iShares", note: "Issuer data; provider configuration required." },
+      { method: "GET", path: "/api/institutions/fidelity", label: "Fidelity", note: "Issuer data; provider configuration required." },
+      { method: "GET", path: "/api/institutions/grayscale", label: "Grayscale", note: "Issuer data; provider configuration required." },
+      { method: "GET", path: "/api/institutions/bitwise", label: "Bitwise", note: "Issuer data; provider configuration required." },
+      { method: "GET", path: "/api/institutions/vaneck", label: "VanEck", note: "Issuer data; provider configuration required." },
+    ],
+  },
+  {
     title: "Macro & Federal Reserve",
     description: "US macroeconomic indicators and official Fed references.",
     endpoints: [
       { method: "GET", path: "/api/macro/indicators?series=DFF,DGS10,CPIAUCSL,PCEPI,UNRATE", label: "Macro indicators", note: "FRED series; requires FRED_API_KEY for live data." },
       { method: "GET", path: "/api/macro/calendar", label: "Macro calendar", note: "Calendar information and official-source links." },
       { method: "GET", path: "/api/macro/fed", label: "Federal Reserve", note: "Fed information and official-source links." },
-    ],
-  },
-  {
-    title: "Institutional Data",
-    description: "Institutional fund data from configured, verified providers.",
-    endpoints: [
-      { method: "GET", path: "/api/institutions/blackrock", label: "BlackRock / iShares", note: "Requires a verified data provider to be configured." },
     ],
   },
   {
@@ -86,7 +91,7 @@ export default function Home() {
         <div className="endpoint-heading">
           <div className="eyebrow">API DIRECTORY</div>
           <h2>Available Endpoints</h2>
-          <p className="muted">Tap an endpoint to open its JSON response. Only routes currently implemented in this repository are listed here.</p>
+          <p className="muted">Tap an endpoint to open its JSON response. Data routes may return provider_not_configured until a verified source is connected.</p>
         </div>
         <div className="endpoint-groups">
           {endpointGroups.map((group) => (
@@ -112,7 +117,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="small">Live ETF data requires a configured provider. x402 payment verification is not enabled yet. Informational research only, not investment advice.</footer>
+      <footer className="small">Live ETF data requires configured providers. x402 payment verification is not enabled yet. Informational research only, not investment advice.</footer>
     </main>
   );
 }
