@@ -88,7 +88,7 @@ if (routes) {
   const server = new x402ResourceServer(facilitator);
   if (BASE_PAY_TO) registerExactEvmScheme(server);
   if (SOLANA_PAY_TO) registerExactSvmScheme(server);
-  // Create the payment proxy from the x402 Next.js integration.
+  // Next.js 16 uses proxy.ts (middleware.ts must not exist). Payment verification uses PayAI.
   paidMiddleware = async (request: NextRequest) => {
     const { paymentProxy } = await import("@x402/next");
     return paymentProxy(routes, server)(request);
