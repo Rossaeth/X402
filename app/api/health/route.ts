@@ -6,7 +6,8 @@ export async function GET() {
   const basePayTo = process.env.BASE_PAY_TO || process.env.X402_BASE_PAY_TO;
   const solanaPayTo = process.env.SOLANA_PAY_TO || process.env.X402_SOLANA_PAY_TO;
   const facilitatorUrl = process.env.X402_FACILITATOR_URL || "https://facilitator.payai.network";
-  const paymentConfigured = Boolean(basePayTo || solanaPayTo);
+  const hasCdpCredentials = Boolean(process.env.CDP_API_KEY_ID && process.env.CDP_API_KEY_SECRET);
+  const paymentConfigured = Boolean((basePayTo || solanaPayTo) && facilitatorUrl);
 
   return jsonOk({
     name: "x402-etf-macro-intelligence",
@@ -18,6 +19,7 @@ export async function GET() {
         ...(solanaPayTo ? ["solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"] : [])
       ],
       facilitatorUrl,
+      facilitators: { payAi: Boolean(facilitatorUrl), cdp: hasCdpCredentials },
       note: paymentConfigured
         ? "Payment middleware is configured. Verify an unpaid request returns HTTP 402 and test a paid settlement before treating payments as production-ready."
         : "Set BASE_PAY_TO and/or SOLANA_PAY_TO to configure x402 payment middleware."
