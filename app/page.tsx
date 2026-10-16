@@ -16,6 +16,13 @@ const endpointGroups = [
     ],
   },
   {
+    title: "FMP · Commodities",
+    description: "Financial Modeling Prep commodities directory. All data endpoints follow the planned $0.02 USDC per-call price; Base and Solana USDC are intended payment networks. x402 verification is not live yet.",
+    endpoints: [
+      { method: "GET", path: "/api/fmp/commodities-list", label: "Commodities list", note: "FMP Stable API: /stable/commodities-list. Returns supported commodity symbols and metadata. Planned price: $0.02 USDC per call." },
+    ],
+  },
+  {
     title: "Economic Calendar",
     description: "Separate provider for scheduled macro releases. Configure FMP_API_KEY in Vercel before using live calendar data.",
     endpoints: [
@@ -72,7 +79,7 @@ export default function Home() {
         <div className="endpoint-heading">
           <div className="eyebrow">API DIRECTORY</div>
           <h2>Agent Endpoints</h2>
-          <p className="muted">Use these HTTP routes from an AI agent or script. ETF routes proxy CryptoETF.today resources; calendar data comes from a separate provider. API keys stay on the server. x402 payment verification is not enabled yet.</p>
+          <p className="muted">Use these HTTP routes from an AI agent or script. CryptoETF.today and FMP data endpoints are planned at $0.02 USDC per call, payable on Base or Solana. API keys stay server-side. Important: x402 payment verification is not enabled yet, so these prices are not being charged until payment middleware is integrated and tested.</p>
         </div>
         <div className="endpoint-groups">
           {endpointGroups.map((group) => (
