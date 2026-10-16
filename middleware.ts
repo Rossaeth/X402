@@ -49,6 +49,24 @@ const routeDefinitions: Array<{ path: string; price: string; description: string
   { path: "/api/macro/indicators", price: "$0.01", description: "FRED macro indicators", queryParams: { series: "DFF,DGS10,CPIAUCSL,UNRATE" } }
 ];
 
+const requiredQueryParams: Record<string, string[]> = {
+  "/api/fmp/profile-cik": ["cik"],
+  "/api/fmp/stock-peers": ["symbol"],
+  "/api/fmp/search-name": ["query"],
+  "/api/fmp/financial-reports-dates": ["symbol"],
+  "/api/fmp/sec-filings-company-search/name": ["company"],
+  "/api/fmp/sec-filings-company-search/symbol": ["symbol"],
+  "/api/fmp/sec-filings-company-search/cik": ["cik"],
+  "/api/fmp/sec-profile": ["symbol"],
+  "/api/fmp/crowdfunding-offerings-search": ["name"],
+  "/api/fmp/crowdfunding-offerings": ["cik"],
+  "/api/fmp/fundraising-search": ["name"],
+  "/api/fmp/fundraising": ["cik"],
+  "/api/fmp/exchange-market-hours": ["exchange"],
+  "/api/fmp/holidays-by-exchange": ["exchange", "from", "to"],
+  "/api/fmp/economic-indicators": ["name"]
+};
+
 function makeRouteConfig() {
   if (!BASE_PAY_TO && !SOLANA_PAY_TO) return null;
   return Object.fromEntries(routeDefinitions.map((route) => {
