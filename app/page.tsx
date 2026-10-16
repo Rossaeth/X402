@@ -44,6 +44,21 @@ const endpointGroups = [
     ],
   },
   {
+    title: "FMP · Market Movers & Exchange Hours",
+    description: "Market movers, global exchange schedules and holidays, macro indicators, Treasury rates, and market risk premium. Planned price: $0.01 USDC per call on Base or Solana. x402 payment verification is not enabled yet.",
+    endpoints: [
+      { method: "GET", path: "/api/fmp/biggest-gainers", label: "Biggest Stock Gainers", note: "FMP: /stable/biggest-gainers" },
+      { method: "GET", path: "/api/fmp/biggest-losers", label: "Biggest Stock Losers", note: "FMP: /stable/biggest-losers" },
+      { method: "GET", path: "/api/fmp/most-actives", label: "Top Traded Stocks", note: "FMP: /stable/most-actives" },
+      { method: "GET", path: "/api/fmp/exchange-market-hours?exchange=NASDAQ", label: "Global Exchange Market Hours", note: "FMP: /stable/exchange-market-hours?exchange=…" },
+      { method: "GET", path: "/api/fmp/holidays-by-exchange?exchange=NASDAQ&from=2026-01-01&to=2026-12-31", label: "Holidays By Exchange", note: "FMP: /stable/holidays-by-exchange; requires exchange and date range (maximum 90 days)." },
+      { method: "GET", path: "/api/fmp/all-exchange-market-hours", label: "All Exchange Market Hours", note: "FMP: /stable/all-exchange-market-hours" },
+      { method: "GET", path: "/api/fmp/economic-indicators?name=GDP", label: "Economics Indicators", note: "FMP: /stable/economic-indicators?name=…; date range optional, maximum 90 days." },
+      { method: "GET", path: "/api/fmp/treasury-rates?from=2026-01-01&to=2026-03-31", label: "Treasury Rates", note: "FMP: /stable/treasury-rates; maximum 90-day date range." },
+      { method: "GET", path: "/api/fmp/market-risk-premium", label: "Market Risk Premium", note: "FMP: /stable/market-risk-premium" },
+    ],
+  },
+  {
     title: "Economic Calendar",
     description: "Separate provider for scheduled macro releases. Configure FMP_API_KEY in Vercel before using live calendar data.",
     endpoints: [
