@@ -53,6 +53,7 @@ const endpointGroups = [
       { method: "GET", path: "/api/fmp/exchange-market-hours?exchange=NASDAQ", label: "Global Exchange Market Hours", note: "FMP: /stable/exchange-market-hours?exchange=…" },
       { method: "GET", path: "/api/fmp/holidays-by-exchange?exchange=NASDAQ&from=2026-01-01&to=2026-12-31", label: "Holidays By Exchange", note: "FMP: /stable/holidays-by-exchange; requires exchange and date range (maximum 90 days)." },
       { method: "GET", path: "/api/fmp/all-exchange-market-hours", label: "All Exchange Market Hours", note: "FMP: /stable/all-exchange-market-hours" },
+      { method: "GET", path: "/api/fmp/economics", label: "Economics", note: "FMP: /stable/economics; date filters optional." },
       { method: "GET", path: "/api/fmp/economic-indicators?name=GDP", label: "Economics Indicators", note: "FMP: /stable/economic-indicators?name=…; date range optional, maximum 90 days." },
       { method: "GET", path: "/api/fmp/treasury-rates?from=2026-01-01&to=2026-03-31", label: "Treasury Rates", note: "FMP: /stable/treasury-rates; maximum 90-day date range." },
       { method: "GET", path: "/api/fmp/market-risk-premium", label: "Market Risk Premium", note: "FMP: /stable/market-risk-premium" },
