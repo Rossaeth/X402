@@ -14,7 +14,7 @@ export async function GET() {
       fred: Boolean(process.env.FRED_API_KEY),
       bls: Boolean(process.env.BLS_API_KEY),
       bea: Boolean(process.env.BEA_API_KEY),
-      etfFlows: Boolean(process.env.ETF_FLOW_API_URL),
+      cryptoEtf: Boolean(process.env.CRYPTOETF_API_KEY),
       blackrock: Boolean(process.env.BLACKROCK_DATA_API_URL),
     },
     timestamp: new Date().toISOString(),
