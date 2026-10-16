@@ -79,20 +79,6 @@ function makeRouteConfig() {
       accepts,
       description: route.description,
       mimeType: "application/json",
-      extensions: {
-        bazaar: {
-          info: {
-            input: { type: "http", method: "GET", queryParams: route.queryParams || {} },
-            output: { type: "json" }
-          },
-          schema: {
-            type: "object",
-            properties: Object.fromEntries(Object.keys(route.queryParams || {}).map((key) => [key, { type: "string" }])),
-            required: Object.keys(route.queryParams || {}),
-            additionalProperties: false
-          }
-        }
-      }
     }];
   })) as unknown as RoutesConfig;
 }
