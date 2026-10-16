@@ -3,7 +3,7 @@
   "info": {
     "title": "X402 ETF & Macro Intelligence API",
     "version": "1.0.0",
-    "description": "Agent-accessible crypto ETF flows, fund data, market data, and macroeconomic indicators. Current deployment payment status is reported by /api/health; prices below are planned pricing and do not imply x402 enforcement is active.",
+    "description": "API for crypto ETF flows and macroeconomic data for AI agents. Paid-route metadata is declared below; runtime x402 payment enforcement must be deployed and verified before charges are enabled.",
     "contact": {
       "name": "API Support",
       "url": "https://x402-etf-macro-intelligence.vercel.app"
@@ -21,13 +21,62 @@
         "operationId": "etf_summary",
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.02"
           }
         }
       }
@@ -38,15 +87,98 @@
         "operationId": "etf_flows",
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.02"
+          }
+        },
+        "parameters": [
+          {
+            "name": "asset",
+            "in": "query",
+            "required": false,
+            "description": "Crypto asset symbol; defaults to BTC.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "BTC",
+                "ETH",
+                "SOL",
+                "XRP",
+                "DOGE",
+                "LINK",
+                "AVAX",
+                "BNB",
+                "DOT",
+                "SUI"
+              ]
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "description": "Lookback period such as 7d or 30d.",
+            "schema": {
+              "type": "string",
+              "default": "30d",
+              "pattern": "^[1-9][0-9]{0,2}d$"
+            }
+          }
+        ]
       }
     },
     "/api/etf/fund-flows": {
@@ -55,15 +187,88 @@
         "operationId": "etf_fund_flows",
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.02"
+          }
+        },
+        "parameters": [
+          {
+            "name": "asset",
+            "in": "query",
+            "required": true,
+            "description": "Crypto asset symbol, e.g. BTC.",
+            "schema": {
+              "type": "string",
+              "default": "BTC",
+              "enum": [
+                "BTC",
+                "ETH",
+                "SOL",
+                "XRP",
+                "DOGE",
+                "LINK",
+                "AVAX",
+                "BNB",
+                "DOT",
+                "SUI"
+              ]
+            }
+          }
+        ]
       }
     },
     "/api/etf/funds": {
@@ -72,15 +277,88 @@
         "operationId": "etf_funds",
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.02"
+          }
+        },
+        "parameters": [
+          {
+            "name": "asset",
+            "in": "query",
+            "required": false,
+            "description": "Crypto asset symbol, e.g. BTC.",
+            "schema": {
+              "type": "string",
+              "default": "BTC",
+              "enum": [
+                "BTC",
+                "ETH",
+                "SOL",
+                "XRP",
+                "DOGE",
+                "LINK",
+                "AVAX",
+                "BNB",
+                "DOT",
+                "SUI"
+              ]
+            }
+          }
+        ]
       }
     },
     "/api/etf/cefi": {
@@ -89,13 +367,62 @@
         "operationId": "etf_cefi",
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.02"
           }
         }
       }
@@ -106,13 +433,62 @@
         "operationId": "etf_prices",
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.02"
           }
         }
       }
@@ -123,13 +499,62 @@
         "operationId": "etf_weekly",
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.02"
           }
         }
       }
@@ -140,13 +565,62 @@
         "operationId": "etf_tickers",
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.02"
           }
         }
       }
@@ -158,13 +632,62 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -186,13 +709,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -214,13 +786,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -242,13 +863,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -270,13 +940,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -298,13 +1017,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -326,13 +1094,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -354,13 +1171,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -382,13 +1248,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -400,13 +1315,62 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -418,13 +1382,62 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -446,13 +1459,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -474,13 +1536,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -492,13 +1603,62 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -520,13 +1680,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -548,13 +1757,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -566,13 +1824,62 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -584,13 +1891,62 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -602,13 +1958,62 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -630,13 +2035,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -676,13 +2130,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -694,13 +2197,62 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -733,13 +2285,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -772,13 +2373,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -820,13 +2470,62 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -838,13 +2537,62 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Provider data returned as JSON"
+            "description": "Provider data returned as JSON",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid or missing query parameters"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider key or upstream service unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -855,15 +2603,86 @@
         "operationId": "macro_calendar",
         "responses": {
           "200": {
-            "description": "Economic calendar data"
+            "description": "Economic calendar data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           },
           "402": {
-            "description": "Payment required if paid access is enabled"
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "Provider error"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "description": "Start date YYYY-MM-DD; defaults to today.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "description": "End date YYYY-MM-DD; defaults to 30 days from today.",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ]
       }
     },
     "/api/macro/indicators": {
@@ -874,22 +2693,72 @@
           {
             "name": "series",
             "in": "query",
-            "required": true,
-            "description": "Comma-separated FRED series IDs, e.g. DFF,DGS10,CPIAUCSL",
+            "required": false,
+            "description": "Comma-separated FRED series IDs. Defaults to DFF,DGS10,CPIAUCSL,PCEPI,UNRATE.",
             "schema": {
-              "type": "string"
+              "type": "string",
+              "default": "DFF,DGS10,CPIAUCSL,PCEPI,UNRATE"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Time-series observations"
+            "description": "Time-series observations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid series parameter"
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
           },
           "503": {
-            "description": "FRED API key or provider unavailable"
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
           }
         }
       }
@@ -900,9 +2769,158 @@
         "operationId": "health",
         "responses": {
           "200": {
-            "description": "Health status"
+            "description": "Health status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
           }
-        }
+        },
+        "security": []
+      }
+    }
+  },
+  "x-discovery": {
+    "ownershipProofs": []
+  },
+  "components": {
+    "schemas": {
+      "ApiSuccess": {
+        "description": "Provider JSON payload. Exact properties depend on the selected endpoint.",
+        "type": "object",
+        "additionalProperties": true
+      },
+      "ApiError": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "message"
+            ],
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "error"
+        ]
+      },
+      "X402PaymentRequired": {
+        "type": "object",
+        "properties": {
+          "x402Version": {
+            "type": "integer",
+            "example": 2
+          },
+          "error": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "accepts": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "scheme",
+                "network",
+                "amount",
+                "asset",
+                "payTo"
+              ],
+              "properties": {
+                "scheme": {
+                  "type": "string",
+                  "example": "exact"
+                },
+                "network": {
+                  "type": "string",
+                  "example": "eip155:8453"
+                },
+                "amount": {
+                  "type": "string",
+                  "example": "20000"
+                },
+                "asset": {
+                  "type": "string"
+                },
+                "payTo": {
+                  "type": "string"
+                },
+                "maxTimeoutSeconds": {
+                  "type": "integer"
+                },
+                "extra": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "extensions": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "x402Version",
+          "accepts"
+        ],
+        "additionalProperties": true
       }
     }
   }
