@@ -13,7 +13,6 @@ const endpointGroups = [
       { method: "GET", path: "/api/etf/prices", label: "Crypto spot prices", note: "Last prices and rolling 24-hour changes." },
       { method: "GET", path: "/api/etf/weekly", label: "Weekly flow analytics", note: "Seven-day totals, inflow days and outflow days." },
       { method: "GET", path: "/api/etf/tickers", label: "Tracked asset tickers", note: "List all 16 supported assets." },
-      { method: "GET", path: "https://cryptoetf.today/embed/flows?asset=all&theme=dark", label: "External flow widget", note: "Public embed; no API key needed." },
     ],
   },
   {
@@ -60,10 +59,17 @@ export default function Home() {
       </header>
 
       <section className="panel" style={{ marginBottom: 24 }}>
-        <h2>Crypto ETF Flows · Live Widget</h2>
-        <p className="muted small">Public daily flow widget from CryptoETF.today. The embed does not require an API key.</p>
-        <iframe src="https://cryptoetf.today/embed/flows?asset=all&amp;theme=dark" width="600" height="220" loading="lazy" style={{ border: 0, width: "100%", maxWidth: 600 }} title="Crypto ETF flows — CryptoETF" />
-        <p className="small"><a href="https://cryptoetf.today/en/api" target="_blank" rel="noreferrer">API documentation ↗</a></p>
+        <h2>Crypto ETF Flows · Authenticated API</h2>
+        <p className="muted small">Live data is loaded through our server-side CryptoETF.today REST adapter using CRYPTOETF_API_KEY. The API key is never sent to the browser.</p>
+        <div className="api-summary">
+          <div><span className="small">Provider</span><strong>CryptoETF.today REST API</strong></div>
+          <div><span className="small">Coverage</span><strong>16 tracked assets</strong></div>
+          <div><span className="small">History</span><strong>Latest 30 days</strong></div>
+        </div>
+        <div className="flow-actions">
+          <a href="/api/etf/summary">Open all-asset flow data ↗</a>
+          <a href="https://cryptoetf.today/en/api" target="_blank" rel="noreferrer">API documentation ↗</a>
+        </div>
       </section>
 
       <section className="grid">
@@ -104,7 +110,7 @@ export default function Home() {
         <div className="endpoint-heading">
           <div className="eyebrow">API DIRECTORY</div>
           <h2>Available Endpoints</h2>
-          <p className="muted">Tap an endpoint to open its JSON response. CryptoETF REST routes require CRYPTOETF_API_KEY; the external widget is public.</p>
+          <p className="muted">Tap an endpoint to open its JSON response. ETF market data is sourced through the authenticated CryptoETF.today REST API.</p>
         </div>
         <div className="endpoint-groups">
           {endpointGroups.map((group) => (
