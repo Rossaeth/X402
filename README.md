@@ -42,3 +42,14 @@ Responses include source and retrieval timestamps where available. Missing sourc
 ## Next: x402
 
 Use current official x402 V2 Next.js middleware/SDK. Configure separate payment requirements for Base and Solana, validate network and USDC asset/mint, and test on Base Sepolia and Solana Devnet before mainnet. Protect paid routes at the server boundary; never trust a client-provided payment-success flag. Keep private keys out of this repository and client-side environment variables.
+
+
+## x402 payment and discovery
+
+- Paid ETF routes: planned price $0.02 USDC per call.
+- Paid FMP and macro routes: planned price $0.01 USDC per call.
+- Networks: Base mainnet (`eip155:8453`) and Solana mainnet (`solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp`).
+- The x402 middleware uses `BASE_PAY_TO` and `SOLANA_PAY_TO` (or the `X402_BASE_PAY_TO` / `X402_SOLANA_PAY_TO` aliases). It defaults to the PayAI facilitator URL configured by `X402_FACILITATOR_URL`.
+- To switch facilitators, set `X402_FACILITATOR_URL` only to a compatible x402 v2 facilitator. CDP facilitator access may require server-side CDP API key authentication; `CDP_API_KEY_ID` and `CDP_API_KEY_SECRET` are placeholders and are not automatically applied by the generic HTTP facilitator client yet.
+- Discovery documents: `/openapi.json` and `/.well-known/x402`.
+- Do not set `X402_ENABLED=true` as a substitute for installing and verifying middleware. Confirm that an unpaid request returns a valid HTTP 402 challenge and a paid request settles before advertising live payments.
