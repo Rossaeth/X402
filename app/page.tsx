@@ -3,13 +3,17 @@ const assets = ["BTC", "ETH", "SOL", "XRP"];
 const endpointGroups = [
   {
     title: "ETF Data",
-    description: "ETF flow endpoints for supported crypto assets.",
+    description: "CryptoETF.today REST endpoints. Set CRYPTOETF_API_KEY in Vercel to enable authenticated live data.",
     endpoints: [
-      { method: "GET", path: "/api/etf/flows?asset=BTC&period=30d", label: "ETF net flows", note: "Change asset to BTC, ETH, SOL, or XRP; period defaults to 30d." },
-      { method: "GET", path: "/api/etf/btc", label: "BTC ETF", note: "Asset-specific ETF data." },
-      { method: "GET", path: "/api/etf/eth", label: "ETH ETF", note: "Asset-specific ETF data." },
-      { method: "GET", path: "/api/etf/sol", label: "SOL ETF", note: "Asset-specific ETF data." },
-      { method: "GET", path: "/api/etf/xrp", label: "XRP ETF", note: "Asset-specific ETF data." },
+      { method: "GET", path: "/api/etf/summary", label: "All-asset flow summary", note: "Latest net flows for 16 tracked assets." },
+      { method: "GET", path: "/api/etf/flows?asset=BTC&period=30d", label: "Asset flow history", note: "30-day daily flow series; supported assets include BTC, ETH, SOL, XRP and 12 others." },
+      { method: "GET", path: "/api/etf/fund-flows?asset=btc", label: "Fund-by-fund flows", note: "Daily flows for individual funds such as IBIT and FBTC." },
+      { method: "GET", path: "/api/etf/funds?asset=btc", label: "ETF fund directory", note: "Fund metadata, current AUM and available coin holdings." },
+      { method: "GET", path: "/api/etf/cefi", label: "CEFI sentiment index", note: "Composite Crypto ETF Flow Index and recent history." },
+      { method: "GET", path: "/api/etf/prices", label: "Crypto spot prices", note: "Last prices and rolling 24-hour changes." },
+      { method: "GET", path: "/api/etf/weekly", label: "Weekly flow analytics", note: "Seven-day totals, inflow days and outflow days." },
+      { method: "GET", path: "/api/etf/tickers", label: "Tracked asset tickers", note: "List all 16 supported assets." },
+      { method: "GET", path: "https://cryptoetf.today/embed/flows?asset=all&theme=dark", label: "External flow widget", note: "Public embed; no API key needed." },
     ],
   },
   {
@@ -52,15 +56,22 @@ export default function Home() {
           <h1>ETF &amp; Macro Intelligence</h1>
           <div className="muted">Institutional flows. Macro catalysts. Source-first research.</div>
         </div>
-        <span className="pill"><span className="status" />Provider integration in progress</span>
+        <span className="pill"><span className="status" />CryptoETF integration in progress</span>
       </header>
+
+      <section className="panel" style={{ marginBottom: 24 }}>
+        <h2>Crypto ETF Flows · Live Widget</h2>
+        <p className="muted small">Public daily flow widget from CryptoETF.today. The embed does not require an API key.</p>
+        <iframe src="https://cryptoetf.today/embed/flows?asset=all&amp;theme=dark" width="600" height="220" loading="lazy" style={{ border: 0, width: "100%", maxWidth: 600 }} title="Crypto ETF flows — CryptoETF" />
+        <p className="small"><a href="https://cryptoetf.today/en/api" target="_blank" rel="noreferrer">API documentation ↗</a></p>
+      </section>
 
       <section className="grid">
         {assets.map((asset) => (
           <article className="panel" key={asset}>
             <div className="muted">{asset} ETF net flow</div>
             <div className="metric">—</div>
-            <div className="small">Waiting for verified flow provider</div>
+            <div className="small">Connect CRYPTOETF_API_KEY to load API data</div>
           </article>
         ))}
       </section>
@@ -81,7 +92,9 @@ export default function Home() {
           <h2 style={{ marginTop: 22 }}>Quick links</h2>
           <div className="list small">
             <a href="/api/health">API health →</a>
+            <a href="/api/etf/summary">All-asset ETF flows →</a>
             <a href="/api/etf/flows?asset=BTC&period=30d">BTC ETF flows →</a>
+            <a href="/api/etf/cefi">CEFI index →</a>
             <a href="/api/macro/indicators?series=DFF,DGS10,CPIAUCSL,PCEPI,UNRATE">Macro indicators →</a>
           </div>
         </article>
@@ -91,7 +104,7 @@ export default function Home() {
         <div className="endpoint-heading">
           <div className="eyebrow">API DIRECTORY</div>
           <h2>Available Endpoints</h2>
-          <p className="muted">Tap an endpoint to open its JSON response. Data routes may return provider_not_configured until a verified source is connected.</p>
+          <p className="muted">Tap an endpoint to open its JSON response. CryptoETF REST routes require CRYPTOETF_API_KEY; the external widget is public.</p>
         </div>
         <div className="endpoint-groups">
           {endpointGroups.map((group) => (
@@ -106,7 +119,7 @@ export default function Home() {
                       <div className="small muted">{endpoint.note}</div>
                       <code className="endpoint-path">{endpoint.path}</code>
                     </div>
-                    <a className="endpoint-open" href={endpoint.path} aria-label={`Open ${endpoint.label} endpoint`}>
+                    <a className="endpoint-open" href={endpoint.path} aria-label={`Open ${endpoint.label} endpoint`} target={endpoint.path.startsWith("https://") ? "_blank" : undefined} rel={endpoint.path.startsWith("https://") ? "noreferrer" : undefined}>
                       <span>{endpoint.method}</span> Open ↗
                     </a>
                   </div>
@@ -117,7 +130,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="small">Live ETF data requires configured providers. x402 payment verification is not enabled yet. Informational research only, not investment advice.</footer>
+      <footer className="small">CryptoETF data is informational research, not investment advice. x402 payment verification is not enabled yet.</footer>
     </main>
   );
 }
