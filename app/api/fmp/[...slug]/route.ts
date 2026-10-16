@@ -9,6 +9,16 @@ type EndpointConfig = {
 };
 
 const endpoints: Record<string, EndpointConfig> = {
+  "biggest-gainers": { upstream: "biggest-gainers", required: [], allowed: [] },
+  "biggest-losers": { upstream: "biggest-losers", required: [], allowed: [] },
+  "most-actives": { upstream: "most-actives", required: [], allowed: [] },
+  "exchange-market-hours": { upstream: "exchange-market-hours", required: ["exchange"], allowed: ["exchange"] },
+  "holidays-by-exchange": { upstream: "holidays-by-exchange", required: ["exchange", "from", "to"], allowed: ["exchange", "from", "to"] },
+  "all-exchange-market-hours": { upstream: "all-exchange-market-hours", required: [], allowed: [] },
+  economics: { upstream: "economics", required: [], allowed: ["from", "to"] },
+  "treasury-rates": { upstream: "treasury-rates", required: [], allowed: ["from", "to"] },
+  "economic-indicators": { upstream: "economic-indicators", required: ["name"], allowed: ["name", "from", "to"] },
+  "market-risk-premium": { upstream: "market-risk-premium", required: [], allowed: ["country"] },
   "profile-cik": { upstream: "profile-cik", required: ["cik"], allowed: ["cik"] },
   "stock-peers": { upstream: "stock-peers", required: ["symbol"], allowed: ["symbol"] },
   "search-name": { upstream: "search-name", required: ["query"], allowed: ["query", "limit", "exchange"] },
@@ -58,6 +68,24 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
   for (const name of config.allowed) {
     const value = incoming.searchParams.get(name);
     if (value !== null && value.trim() !== "") upstream.searchParams.set(name, value.trim());
+  }
+  if (upstream.searchParams.has("from") || upstream.searchParams.has("to")) {
+    const from = upstream.searchParams.get("from");
+    const to = upstream.searchParams.get("to");
+    const datePattern = /^\\d{4}-\\d{2}-\\d{2}$/;
+    if ((from && !datePattern.test(from)) || (to && !datePattern.test(to))) {
+      return jsonError(400, "invalid_date", "Dates must use YYYY-MM-DD format.");
+    }
+    if (from && to) {
+      const fromTime = Date.parse(from);
+      const toTime = Date.parse(to);
+      if (!Number.isFinite(fromTime) || !Number.isFinite(toTime) || toTime < fromTime) {
+        return jsonError(400, "invalid_date_range", "to must be a valid date on or after from.");
+      }
+      if ((toTime - fromTime) / 86400000 > 90) {
+        return jsonError(400, "date_range_too_large", "Date range must not exceed 90 days.");
+      }
+    }
   }
   if (upstream.searchParams.has("limit")) {
     const limit = Number(upstream.searchParams.get("limit"));
