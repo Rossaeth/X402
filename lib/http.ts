@@ -1,0 +1,3 @@
+import { NextResponse } from "next/server";
+export function jsonError(status: number, code: string, message: string, extra: Record<string, unknown> = {}) { return NextResponse.json({ error: { code, message, ...extra } }, { status, headers: { "Cache-Control": "no-store" } }); }
+export function jsonOk(data: unknown, maxAge = 60) { return NextResponse.json(data, { headers: { "Cache-Control": `public, s-maxage=${maxAge}, stale-while-revalidate=300` } }); }
