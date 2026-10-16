@@ -3,7 +3,7 @@
   "info": {
     "title": "X402 ETF & Macro Intelligence API",
     "version": "1.0.0",
-    "description": "API for crypto ETF flows and macroeconomic data for AI agents. Paid-route metadata is declared below; runtime x402 payment enforcement must be deployed and verified before charges are enabled.",
+    "description": "API for crypto ETF flows and macroeconomic data for AI agents. Paid-route metadata is declared below; runtime x402 payment enforcement must be deployed and verified before charges are enabled. Support: rossadi.ardian@gmail.com.",
     "contact": {
       "name": "API Support",
       "url": "https://x402-etf-macro-intelligence.vercel.app",
