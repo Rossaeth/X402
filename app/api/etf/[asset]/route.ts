@@ -1,0 +1,4 @@
+import { jsonError } from "@/lib/http";
+export const dynamic = "force-dynamic";
+const allowed = new Set(["btc", "eth", "sol", "xrp"]);
+export async function GET(request: Request, context: { params: Promise<{ asset: string }> }) { const { asset: rawAsset } = await context.params; const asset = rawAsset.toLowerCase(); if (!allowed.has(asset)) return jsonError(404, "unknown_asset", "Supported assets: btc, eth, sol, xrp."); const url = new URL(request.url); url.searchParams.set("asset", asset.toUpperCase()); return fetch(new URL(`/api/etf/flows?${url.searchParams.toString()}`, url.origin), { cache: "no-store" }); }
