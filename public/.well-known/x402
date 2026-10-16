@@ -1,0 +1,13 @@
+{
+  "name": "x402-etf-macro-intelligence",
+  "version": "1.0.0",
+  "description": "Crypto ETF flows and macroeconomic data API for AI agents. CryptoETF endpoints are planned at $0.02 USDC per call; FMP endpoints are planned at $0.01 USDC per call. Base and Solana USDC are intended payment networks. Check /api/health for current payment status; x402 payments are not advertised as active until middleware is deployed and verified.",
+  "documentation": "https://x402-etf-macro-intelligence.vercel.app/openapi.json",
+  "openapi": "https://x402-etf-macro-intelligence.vercel.app/openapi.json",
+  "homepage": "https://x402-etf-macro-intelligence.vercel.app",
+  "networks": [
+    "base",
+    "solana"
+  ],
+  "status": "payment-integration-pending"
+}
