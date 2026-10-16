@@ -1,0 +1,128 @@
+{
+  "schema_version": "0.1",
+  "provider": "x402-etf-macro-intelligence",
+  "name": "X402 ETF & Macro Intelligence",
+  "description": "Crypto ETF flows, fund data, market movers, and macroeconomic indicators for AI agents.",
+  "documentation": "https://x402-etf-macro-intelligence.vercel.app/openapi.json",
+  "homepage": "https://x402-etf-macro-intelligence.vercel.app",
+  "status": "payment-integration-pending",
+  "payment_enabled": false,
+  "services": [
+    {
+      "service_id": "x402-etf-macro-intelligence/crypto-etf",
+      "name": "Crypto ETF Data",
+      "description": "Read ETF flows, fund data, prices, weekly analytics, tickers, and summary data for supported crypto assets.",
+      "capability_tags": [
+        "finance",
+        "crypto",
+        "etf",
+        "market-data",
+        "research"
+      ],
+      "endpoint_url": "https://x402-etf-macro-intelligence.vercel.app/api/etf/summary",
+      "endpoints": [
+        "/api/etf/summary",
+        "/api/etf/flows?asset=BTC",
+        "/api/etf/fund-flows?asset=BTC",
+        "/api/etf/funds?asset=BTC",
+        "/api/etf/cefi",
+        "/api/etf/prices",
+        "/api/etf/weekly",
+        "/api/etf/tickers"
+      ],
+      "planned_price_per_call": 0.02,
+      "payment_token": "USDC",
+      "planned_networks": [
+        "eip155:8453",
+        "solana"
+      ],
+      "pricing_model": "flat",
+      "agent_callable": true,
+      "input_format": "query",
+      "output_format": "json",
+      "auth_required": false,
+      "payment_status": "not_enabled"
+    },
+    {
+      "service_id": "x402-etf-macro-intelligence/fmp-market-macro",
+      "name": "FMP Market & Macro Data",
+      "description": "Read market movers, exchange hours, SEC/company lookup, fundraising, treasury rates, and economic indicators.",
+      "capability_tags": [
+        "finance",
+        "markets",
+        "macro",
+        "sec",
+        "research"
+      ],
+      "endpoint_url": "https://x402-etf-macro-intelligence.vercel.app/api/fmp/biggest-gainers",
+      "endpoints": [
+        "/api/fmp/commodities-list",
+        "/api/fmp/biggest-gainers",
+        "/api/fmp/biggest-losers",
+        "/api/fmp/most-actives",
+        "/api/fmp/exchange-market-hours?exchange=NASDAQ",
+        "/api/fmp/holidays-by-exchange?exchange=NASDAQ&from=2026-01-01&to=2026-03-31",
+        "/api/fmp/all-exchange-market-hours",
+        "/api/fmp/economics",
+        "/api/fmp/treasury-rates",
+        "/api/fmp/economic-indicators?name=GDP",
+        "/api/fmp/market-risk-premium",
+        "/api/fmp/profile-cik?cik=320193",
+        "/api/fmp/stock-peers?symbol=AAPL",
+        "/api/fmp/search-name?query=Apple",
+        "/api/fmp/financial-reports-dates?symbol=AAPL",
+        "/api/fmp/sec-filings-company-search/name?company=Berkshire",
+        "/api/fmp/sec-filings-company-search/symbol?symbol=AAPL",
+        "/api/fmp/sec-filings-company-search/cik?cik=0000320193",
+        "/api/fmp/sec-profile?symbol=AAPL",
+        "/api/fmp/standard-industrial-classification-list",
+        "/api/fmp/crowdfunding-offerings-latest?page=0&limit=20",
+        "/api/fmp/crowdfunding-offerings-search?name=enotap",
+        "/api/fmp/crowdfunding-offerings?cik=0001916078",
+        "/api/fmp/fundraising-latest?page=0&limit=10",
+        "/api/fmp/fundraising-search?name=NJOY",
+        "/api/fmp/fundraising?cik=0001547416"
+      ],
+      "planned_price_per_call": 0.01,
+      "payment_token": "USDC",
+      "planned_networks": [
+        "eip155:8453",
+        "solana"
+      ],
+      "pricing_model": "flat",
+      "agent_callable": true,
+      "input_format": "query",
+      "output_format": "json",
+      "auth_required": false,
+      "payment_status": "not_enabled"
+    },
+    {
+      "service_id": "x402-etf-macro-intelligence/fred-macro",
+      "name": "FRED Macro Indicators",
+      "description": "Read selected FRED time series and economic calendar data.",
+      "capability_tags": [
+        "finance",
+        "macroeconomics",
+        "economic-indicators",
+        "research"
+      ],
+      "endpoint_url": "https://x402-etf-macro-intelligence.vercel.app/api/macro/indicators?series=DFF,DGS10,CPIAUCSL,UNRATE",
+      "endpoints": [
+        "/api/macro/calendar",
+        "/api/macro/indicators?series=DFF,DGS10,CPIAUCSL,UNRATE"
+      ],
+      "planned_price_per_call": 0.01,
+      "payment_token": "USDC",
+      "planned_networks": [
+        "eip155:8453",
+        "solana"
+      ],
+      "pricing_model": "flat",
+      "agent_callable": true,
+      "input_format": "query",
+      "output_format": "json",
+      "auth_required": false,
+      "payment_status": "not_enabled"
+    }
+  ]
+}
