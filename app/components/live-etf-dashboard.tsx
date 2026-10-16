@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type FlowDay = { date: string; netFlowUsdM: number };
-type AssetFlow = { symbol?: string; asset?: string; days?: FlowDay[]; updatedAt?: string };
+type AssetFlow = { symbol?: string; asset?: string; days?: FlowDay[]; windowDays?: number; updatedAt?: string };
 type SummaryAsset = { symbol: string; asset?: string; date?: string; netFlowUsdM: number };
 type Summary = { assets?: SummaryAsset[]; updatedAt?: string };
 type Price = { symbol?: string; priceUsd?: number; change24hPct?: number; price?: number; priceChangePercent?: number };
@@ -107,7 +107,7 @@ export default function LiveEtfDashboard() {
       {error && <div className="api-error"><strong>Live data unavailable</strong><p>{error}</p><span>Website tetap berjalan, tetapi angka pasar tidak akan diisi dengan data contoh.</span></div>}
 
       <div className="live-metrics">
-        <article className="live-metric"><span>Selected asset · latest ETF flow</span><strong className={latest?.netFlowUsdM > 0 ? "positive" : latest?.netFlowUsdM < 0 ? "negative" : ""}>{loading && !latest ? "Loading…" : money(latest?.netFlowUsdM)}</strong><small>{latest?.date ? `Data date: ${latest.date}` : "USD millions · latest provider date"}</small></article>
+        <article className="live-metric"><span>Selected asset · latest ETF flow</span><strong className={(latest?.netFlowUsdM ?? 0) > 0 ? "positive" : (latest?.netFlowUsdM ?? 0) < 0 ? "negative" : ""}>{loading && !latest ? "Loading…" : money(latest?.netFlowUsdM)}</strong><small>{latest?.date ? `Data date: ${latest.date}` : "USD millions · latest provider date"}</small></article>
         <article className="live-metric"><span>Spot price</span><strong>{priceText(selectedPrice?.priceUsd ?? selectedPrice?.price)}</strong><small className={(selectedPrice?.change24hPct ?? selectedPrice?.priceChangePercent ?? 0) >= 0 ? "positive" : "negative"}>{selectedPrice ? `${(selectedPrice.change24hPct ?? selectedPrice.priceChangePercent ?? 0) >= 0 ? "+" : ""}${(selectedPrice.change24hPct ?? selectedPrice.priceChangePercent ?? 0).toFixed(2)}% · 24h` : "Provider price data"}</small></article>
         <article className="live-metric"><span>CEFI sentiment index</span><strong>{cefi?.current ?? "—"} <small>/ 100</small></strong><small>{cefi?.date ? `As of ${cefi.date}` : "Market-wide ETF flow sentiment"}</small></article>
         <article className="live-metric"><span>Selected asset · 30-day net flow</span><strong className={total > 0 ? "positive" : total < 0 ? "negative" : ""}>{days.length ? money(total) : "—"}</strong><small>{days.length ? `${positive} inflow days · ${negative} outflow days` : "Waiting for flow history"}</small></article>
