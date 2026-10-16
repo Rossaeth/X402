@@ -23,6 +23,27 @@ const endpointGroups = [
     ],
   },
   {
+    title: "FMP · Company, SEC & Fundraising",
+    description: "Company lookup, peer comparisons, report dates, SEC filing search, industry classifications, crowdfunding, and equity offerings. Planned price: $0.01 USDC per call on Base or Solana. x402 verification is not enabled yet.",
+    endpoints: [
+      { method: "GET", path: "/api/fmp/profile-cik?cik=320193", label: "Company Profile by CIK", note: "FMP: /stable/profile-cik?cik=…" },
+      { method: "GET", path: "/api/fmp/stock-peers?symbol=AAPL", label: "Stock Peer Comparison", note: "FMP: /stable/stock-peers?symbol=…" },
+      { method: "GET", path: "/api/fmp/search-name?query=Apple", label: "Company Name Search", note: "FMP: /stable/search-name?query=…" },
+      { method: "GET", path: "/api/fmp/financial-reports-dates?symbol=AAPL", label: "Financial Reports Dates", note: "FMP: /stable/financial-reports-dates?symbol=…" },
+      { method: "GET", path: "/api/fmp/sec-filings-company-search/name?company=Berkshire", label: "SEC Filings By Name", note: "FMP: /stable/sec-filings-company-search/name?company=…" },
+      { method: "GET", path: "/api/fmp/sec-filings-company-search/symbol?symbol=AAPL", label: "SEC Filings Company Search By Symbol", note: "FMP: /stable/sec-filings-company-search/symbol?symbol=…" },
+      { method: "GET", path: "/api/fmp/sec-filings-company-search/cik?cik=0000320193", label: "SEC Filings Company Search By CIK", note: "FMP: /stable/sec-filings-company-search/cik?cik=…" },
+      { method: "GET", path: "/api/fmp/sec-profile?symbol=AAPL", label: "SEC Company Full Profile", note: "FMP: /stable/sec-profile?symbol=…" },
+      { method: "GET", path: "/api/fmp/standard-industrial-classification-list", label: "Industry Classification List", note: "FMP: /stable/standard-industrial-classification-list" },
+      { method: "GET", path: "/api/fmp/crowdfunding-offerings-latest?page=0&limit=20", label: "Latest Crowdfunding Campaigns", note: "FMP: /stable/crowdfunding-offerings-latest" },
+      { method: "GET", path: "/api/fmp/crowdfunding-offerings-search?name=enotap", label: "Crowdfunding Campaign Search", note: "FMP: /stable/crowdfunding-offerings-search?name=…" },
+      { method: "GET", path: "/api/fmp/crowdfunding-offerings?cik=0001916078", label: "Crowdfunding By CIK", note: "FMP: /stable/crowdfunding-offerings?cik=…" },
+      { method: "GET", path: "/api/fmp/fundraising-latest?page=0&limit=10", label: "Equity Offering Updates", note: "FMP: /stable/fundraising-latest" },
+      { method: "GET", path: "/api/fmp/fundraising-search?name=NJOY", label: "Equity Offering Search", note: "FMP: /stable/fundraising-search?name=…" },
+      { method: "GET", path: "/api/fmp/fundraising?cik=0001547416", label: "Equity Offering By CIK", note: "FMP: /stable/fundraising?cik=…" },
+    ],
+  },
+  {
     title: "Economic Calendar",
     description: "Separate provider for scheduled macro releases. Configure FMP_API_KEY in Vercel before using live calendar data.",
     endpoints: [
