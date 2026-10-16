@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { paymentProxy } from "@x402/next";
+import { createCdpFacilitatorClient } from "@coinbase/cdp-sdk/x402";
 import { HTTPFacilitatorClient, x402ResourceServer } from "@x402/core/server";
 import { registerExactEvmScheme } from "@x402/evm/exact/server";
 import { registerExactSvmScheme } from "@x402/svm/exact/server";
@@ -99,8 +100,13 @@ function makeRouteConfig() {
 const routes = makeRouteConfig();
 let paidMiddleware: ((request: NextRequest) => Promise<Response> | Response) | null = null;
 if (routes) {
-  const facilitator = new HTTPFacilitatorClient({ url: FACILITATOR_URL });
-  const server = new x402ResourceServer(facilitator);
+  const payAiFacilitator = new HTTPFacilitatorClient({ url: FACILITATOR_URL });
+  const hasCdpCredentials = Boolean(process.env.CDP_API_KEY_ID && process.env.CDP_API_KEY_SECRET);
+  // CDP gets first priority for networks it supports (currently Base); PayAI fills in other supported networks such as Solana.
+  const facilitators = hasCdpCredentials
+    ? [createCdpFacilitatorClient(), payAiFacilitator]
+    : [payAiFacilitator];
+  const server = new x402ResourceServer(facilitators);
   if (BASE_PAY_TO) registerExactEvmScheme(server);
   if (SOLANA_PAY_TO) registerExactSvmScheme(server);
   paidMiddleware = paymentProxy(routes, server);
