@@ -1,0 +1,3 @@
+import { jsonOk } from "@/lib/http";
+export const revalidate = 3600;
+export async function GET() { return jsonOk({ source: "Federal Reserve", source_url: "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm", status: "official_source_link", note: "This starter endpoint links to the official FOMC schedule. Add and validate a parser or calendar provider before treating event dates as structured data.", retrieved_at: new Date().toISOString(), events: [] }, 3600); }
