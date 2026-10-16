@@ -7,10 +7,8 @@ const endpointGroups = [
     title: "ETF Data",
     description: "CryptoETF.today REST endpoints. Set CRYPTOETF_API_KEY in Vercel to enable authenticated live data.",
     endpoints: [
-      { method: "GET", path: "/api/etf/summary", label: "All-asset flow summary", note: "Latest net flows for 16 tracked assets." },
+      { method: "GET", path: "/api/etf/summary", label: "All-asset flow summary", note: "Latest net flows for all 16 tracked assets." },
       { method: "GET", path: "/api/etf/flows?asset=BTC&period=30d", label: "Asset flow history", note: "30-day daily flow series; supported assets include BTC, ETH, SOL, XRP and 12 others." },
-      { method: "GET", path: "/api/etf/fund-flows?asset=btc", label: "Fund-by-fund flows", note: "Daily flows for individual funds such as IBIT and FBTC." },
-      { method: "GET", path: "/api/etf/funds?asset=btc", label: "ETF fund directory", note: "Fund metadata, current AUM and available coin holdings." },
       { method: "GET", path: "/api/etf/cefi", label: "CEFI sentiment index", note: "Composite Crypto ETF Flow Index and recent history." },
       { method: "GET", path: "/api/etf/prices", label: "Crypto spot prices", note: "Last prices and rolling 24-hour changes." },
       { method: "GET", path: "/api/etf/weekly", label: "Weekly flow analytics", note: "Seven-day totals, inflow days and outflow days." },
