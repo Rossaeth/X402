@@ -15,6 +15,7 @@ export async function GET() {
       bls: Boolean(process.env.BLS_API_KEY),
       bea: Boolean(process.env.BEA_API_KEY),
       cryptoEtf: Boolean(process.env.CRYPTOETF_API_KEY),
+      economicCalendar: Boolean(process.env.FMP_API_KEY),
       blackrock: Boolean(process.env.BLACKROCK_DATA_API_URL),
     },
     timestamp: new Date().toISOString(),
