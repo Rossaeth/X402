@@ -1,3 +1,5 @@
+import LiveEtfDashboard from "@/app/components/live-etf-dashboard";
+
 const assets = ["BTC", "ETH", "SOL", "XRP"];
 
 const endpointGroups = [
@@ -55,32 +57,10 @@ export default function Home() {
           <h1>ETF &amp; Macro Intelligence</h1>
           <div className="muted">Institutional flows. Macro catalysts. Source-first research.</div>
         </div>
-        <span className="pill"><span className="status" />CryptoETF integration in progress</span>
+        <span className="pill"><span className="status" />Live API dashboard · auto-refresh 60s</span>
       </header>
 
-      <section className="panel" style={{ marginBottom: 24 }}>
-        <h2>Crypto ETF Flows · Authenticated API</h2>
-        <p className="muted small">Live data is loaded through our server-side CryptoETF.today REST adapter using CRYPTOETF_API_KEY. The API key is never sent to the browser.</p>
-        <div className="api-summary">
-          <div><span className="small">Provider</span><strong>CryptoETF.today REST API</strong></div>
-          <div><span className="small">Coverage</span><strong>16 tracked assets</strong></div>
-          <div><span className="small">History</span><strong>Latest 30 days</strong></div>
-        </div>
-        <div className="flow-actions">
-          <a href="/api/etf/summary">Open all-asset flow data ↗</a>
-          <a href="https://cryptoetf.today/en/api" target="_blank" rel="noreferrer">API documentation ↗</a>
-        </div>
-      </section>
-
-      <section className="grid">
-        {assets.map((asset) => (
-          <article className="panel" key={asset}>
-            <div className="muted">{asset} ETF net flow</div>
-            <div className="metric">—</div>
-            <div className="small">Connect CRYPTOETF_API_KEY to load API data</div>
-          </article>
-        ))}
-      </section>
+      <LiveEtfDashboard />
 
       <section className="cards">
         <article className="panel">
@@ -110,7 +90,7 @@ export default function Home() {
         <div className="endpoint-heading">
           <div className="eyebrow">API DIRECTORY</div>
           <h2>Available Endpoints</h2>
-          <p className="muted">Tap an endpoint to open its JSON response. ETF market data is sourced through the authenticated CryptoETF.today REST API.</p>
+          <p className="muted">Each endpoint shows its HTTP method, path and purpose. Open a route to inspect JSON; use the cURL example above for scripts and AI-agent tool wrappers. ETF provider keys remain server-side.</p>
         </div>
         <div className="endpoint-groups">
           {endpointGroups.map((group) => (
