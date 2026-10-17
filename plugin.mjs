@@ -1,9 +1,191 @@
-// x402 ETF & Macro Intelligence PayBox1 plugin bundle
-const BASE_URL='https://x402-sand.vercel.app';
-const BASE_USDC='0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',SOL_USDC='EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-const routes=[['/api/etf/summary',.02],['/api/etf/flows',.02],['/api/etf/fund-flows',.02],['/api/etf/funds',.02],['/api/etf/cefi',.02],['/api/etf/prices',.02],['/api/etf/weekly',.02],['/api/etf/tickers',.02],['/api/etf/[asset]',.02],['/api/bea/gdp',.01],['/api/bea/inflation',.01],['/api/bea/personal-income',.01],['/api/bea/corporate-profits',.01],['/api/bea/trade',.01],['/api/bea/international-investment',.01],['/api/bea/gdp-by-industry',.01],['/api/macro/indicators',.01]];
-const tools=[{name:'get_api_health',description:'Check API health',inputSchema:{type:'object',properties:{}}},{name:'list_research_endpoints',description:'List all supported ETF, BEA, macro and research endpoints with prices',inputSchema:{type:'object',properties:{}}},{name:'propose_paid_research',description:'Prepare a payment proposal. PayBox must validate HTTP 402 and approve payment; this tool does not itself pay.',inputSchema:{type:'object',properties:{endpoint:{type:'string',enum:routes.map(r=>r[0])},query:{type:'object',additionalProperties:{type:'string'}},network:{type:'string',enum:['base','solana'],default:'base'}},required:['endpoint']}}];
-function response(id,result){return {jsonrpc:'2.0',id,result:{...result,resultType:'complete'}}}
-async function call(name,a={}){if(name==='get_api_health'){let r=await fetch(BASE_URL+'/api/health');return await r.json()}if(name==='list_research_endpoints')return {base_url:BASE_URL,endpoints:routes.map(([path,price])=>({path,method:'GET',price_usd:price})),note:'Live HTTP 402 challenge is authoritative.'};if(name==='propose_paid_research'){let route=routes.find(r=>r[0]===a.endpoint);if(!route)throw Error('Endpoint not allowlisted');let p={...(a.query||{})},path=a.endpoint;if(path==='/api/etf/[asset]'){if(!p.asset)throw Error('asset required');path='/api/etf/'+encodeURIComponent(p.asset);delete p.asset}let u=new URL(path,BASE_URL);for(let [k,v] of Object.entries(p))u.searchParams.set(k,String(v));let n=a.network||'base';if(!['base','solana'].includes(n))throw Error('network must be base or solana');return {'io.paybox/transactionProposal':{version:'1',kind:'x402',expiresAt:new Date(Date.now()+240000).toISOString(),chain:n==='base'?'eip155:8453':'solana:mainnet',request:{url:u.toString(),method:'GET'},payment:{asset:n==='base'?BASE_USDC:SOL_USDC,maxAmount:String(Math.round(route[1]*1e6))}},note:'Proposal only; PayBox must validate live HTTP 402 and obtain approval.'}}throw Error('Unknown tool')}
-async function dispatch(m){let p=m.params||{};if(m.method==='initialize')return response(m.id,{protocolVersion:'2024-11-05',capabilities:{tools:{listChanged:false}},serverInfo:{name:'x402-etf-macro-intelligence',version:'1.2.0'}});if(m.method==='ping')return response(m.id,{});if(m.method==='tools/list')return response(m.id,{tools});if(m.method==='tools/call'){try{let v=await call(p.name,p.arguments||{});return response(m.id,{content:[{type:'text',text:JSON.stringify(v,null,2)}],structuredContent:v,isError:false})}catch(e){return response(m.id,{content:[{type:'text',text:e.message}],isError:true})}}if(m.method==='resources/list')return response(m.id,{resources:[]});if(m.method==='prompts/list')return response(m.id,{prompts:[]});if(m.method?.startsWith('notifications/'))return null;return {jsonrpc:'2.0',id:m.id??null,error:{code:-32601,message:'Method not found'}}}
-let b='';process.stdin.setEncoding('utf8');process.stdin.on('data',c=>{b+=c;let i;while((i=b.indexOf('\n'))>=0){let l=b.slice(0,i).trim();b=b.slice(i+1);if(!l)continue;try{let m=JSON.parse(l);dispatch(m).then(r=>{if(r)process.stdout.write(JSON.stringify(r)+'\n')}).catch(e=>process.stderr.write(e.message+'\n'))}catch{process.stdout.write(JSON.stringify({jsonrpc:'2.0',id:null,error:{code:-32700,message:'Parse error'}})+'\n')}}});
+#!/usr/bin/env node
+// x402 ETF & Macro Intelligence — PayBox stdio MCP plugin
+// No API keys, private keys, or seed phrases are embedded in this bundle.
+
+const BASE_URL = 'https://x402-sand.vercel.app';
+const USDC_BASE = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+const USDC_SOLANA = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+const MAX_RESPONSE_CHARS = 12000;
+const UI_RESOURCE_URI = 'ui://x402-etf-macro-intelligence/research-dashboard';
+const DASHBOARD_HTML = "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">\n<title>Treasury & Macro Intelligence</title>\n<style>\n:root{color-scheme:dark;--bg:#0b1017;--panel:#121b27;--line:#273446;--muted:#98a8bb;--text:#eef4fb;--accent:#f7931a;--green:#38d996;--red:#ff6b78}\n*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}main{padding:16px;max-width:1100px;margin:auto}.top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.brand{display:flex;gap:10px;align-items:center}.mark{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#382717;color:var(--accent);font-size:21px;font-weight:800}.eyebrow{color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase}.title{font-size:20px;font-weight:750;letter-spacing:-.02em}.pill{border:1px solid var(--line);border-radius:999px;padding:5px 9px;color:var(--muted);font-size:11px}.pill.ok{color:var(--green);border-color:#1f6d54}.hero{margin:16px 0;padding:15px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(120deg,#172434,#111923)}.hero h2{font-size:17px;margin:3px 0 6px}.hero p{margin:0;color:var(--muted);overflow-wrap:anywhere}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px 0}.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}.label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}.value{font-size:17px;font-weight:750;margin-top:7px;overflow-wrap:anywhere}.sub{font-size:11px;color:var(--muted);margin-top:4px}.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}.tab{border:1px solid var(--line);background:#101823;color:var(--muted);border-radius:8px;padding:8px 12px;cursor:pointer}.tab.active{background:#2b2117;color:#ffbd69;border-color:#77502a}.panel{border:1px solid var(--line);background:var(--panel);border-radius:13px;padding:12px;overflow:hidden}.panelhead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px}.panelhead strong{font-size:13px}.search{background:#0b1119;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:8px;min-width:150px;max-width:100%}.tablewrap{overflow:auto;max-height:390px}table{border-collapse:collapse;width:100%;font-size:12px}th,td{border-bottom:1px solid var(--line);padding:9px;text-align:left;vertical-align:top;max-width:300px;overflow-wrap:anywhere}th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel)}pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:480px;overflow:auto;font-size:12px;color:#c5d5e7;margin:0}.bars{display:flex;flex-direction:column;gap:8px}.barrow{display:grid;grid-template-columns:minmax(70px,1fr) 3fr auto;gap:9px;align-items:center;font-size:12px}.track{height:7px;background:#263446;border-radius:99px;overflow:hidden}.fill{height:100%;background:var(--accent);border-radius:99px}.empty{padding:28px 12px;text-align:center;color:var(--muted)}footer{color:var(--muted);font-size:10px;margin:12px 2px 0}@media(max-width:620px){main{padding:11px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.title{font-size:17px}.barrow{grid-template-columns:80px 1fr auto}}\n</style>\n</head>\n<body><main>\n<header class=\"top\"><div class=\"brand\"><div class=\"mark\">↗</div><div><div class=\"eyebrow\">Research terminal</div><div class=\"title\">Treasury &amp; Macro Intelligence</div></div></div><span id=\"status\" class=\"pill\">Waiting for tool result</span></header>\n<section class=\"hero\"><div class=\"eyebrow\" id=\"endpoint\">X402 RESEARCH</div><h2 id=\"headline\">Interactive research dashboard</h2><p id=\"summary\">When a connected MCP client supplies the tool result, metrics, tables, and charts will appear here.</p></section>\n<section id=\"cards\" class=\"cards\"><div class=\"card\"><div class=\"label\">Data</div><div class=\"value\">Awaiting</div><div class=\"sub\">Tool result</div></div><div class=\"card\"><div class=\"label\">View</div><div class=\"value\">Interactive</div><div class=\"sub\">Overview + raw data</div></div></section>\n<nav class=\"tabs\"><button class=\"tab active\" data-tab=\"overview\">Overview</button><button class=\"tab\" data-tab=\"latestflows\">Latest ETF widget</button><button class=\"tab\" data-tab=\"table\">Data table</button><button class=\"tab\" data-tab=\"json\">Raw JSON</button></nav>\n<section id=\"latestflows\" class=\"panel\" hidden><div class=\"panelhead\"><strong>Latest daily ETF flows · CryptoETF</strong><span class=\"pill\">Public widget</span></div><iframe src=\"https://cryptoetf.today/embed/flows?asset=all&amp;theme=auto\" title=\"Crypto ETF flows — CryptoETF\" loading=\"lazy\" style=\"width:100%;height:260px;border:0;border-radius:10px;background:#0b1017\" sandbox=\"allow-scripts allow-same-origin allow-popups\"></iframe><p class=\"sub\">Latest published day across supported assets. Figures may be revised during the day; source: CryptoETF.</p></section>\n<section id=\"overview\" class=\"panel\"><div class=\"panelhead\"><strong>Data overview</strong><span class=\"pill\">Auto-detected</span></div><div id=\"bars\" class=\"bars\"><div class=\"empty\">No result loaded yet.</div></div></section>\n<section id=\"table\" class=\"panel\" hidden><div class=\"panelhead\"><strong>Records</strong><input id=\"filter\" class=\"search\" placeholder=\"Filter records…\"></div><div id=\"tablebody\" class=\"tablewrap\"><div class=\"empty\">No records loaded yet.</div></div></section>\n<section id=\"json\" class=\"panel\" hidden><div class=\"panelhead\"><strong>Complete response</strong><button id=\"copy\" class=\"tab\">Copy JSON</button></div><pre id=\"raw\">{}</pre></section>\n<footer>Source data is provided by the selected research endpoint. Figures are not inferred; only values present in the tool result are shown. Payment state is shown only when supplied by the result.</footer>\n</main>\n<script>\n(function(){\nlet payload=null, rows=[];\nconst $=id=>document.getElementById(id);\nfunction fmt(v){if(v===null)return 'null';if(typeof v==='object')return Array.isArray(v)?'['+v.length+' items]':'{object}';if(typeof v==='number')return Number.isFinite(v)?v.toLocaleString(undefined,{maximumFractionDigits:6}):String(v);return String(v)}\nfunction esc(v){return String(v).replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',\"'\":'&#39;'}[c]))}\nfunction flatten(obj,prefix='',out=[]){if(obj&&typeof obj==='object'&&!Array.isArray(obj)){for(const [k,v] of Object.entries(obj)){const key=prefix?prefix+'.'+k:k;if(v&&typeof v==='object'&&!Array.isArray(v))flatten(v,key,out);else out.push([key,v])}}else out.push([prefix||'value',obj]);return out}\nfunction findData(m){if(!m||typeof m!=='object')return null;const msg=m.message&&typeof m.message==='object'?m.message:m;const p=msg.params||{};const candidates=[p.structuredContent,p.result,p.content?.find(c=>c&&typeof c.text==='string'),msg.result?.structuredContent,msg.result?.content?.find(c=>c&&typeof c.text==='string'),msg.structuredContent,p.data,msg];for(const c of candidates){if(c&&typeof c==='object'){if(typeof c.text==='string'){try{return JSON.parse(c.text)}catch{return {message:c.text}}}if(c.structuredContent)return c.structuredContent;if(c.data&&typeof c.data==='object'&&!('endpoint'in c)&&!('path'in c)&&!('title'in c)&&!('paid'in c))return c.data;if(!c.method&&!c.jsonrpc)return c}}return null}\nfunction isFred(p){const d=p&&p.data&&typeof p.data===\"object\"?p.data:p;return String(d.source||p.source||\"\").toUpperCase()===\"FRED\"&&Array.isArray(d.data)&&d.data.some(s=>s&&Array.isArray(s.observations))}\nfunction renderFred(p){\nconst envelope=p;const data=p&&p.data&&typeof p.data===\"object\"&&Array.isArray(p.data.data)?p.data:p;\nconst series=data.data.filter(s=>s&&Array.isArray(s.observations));\nconst obsRows=series.flatMap(s=>s.observations.map(o=>({series:s.series,name:s.name,date:o.date,value:o.value,status:s.status})));\nconst latest=series.map(s=>({...s,observations:[...s.observations].sort((a,b)=>String(b.date).localeCompare(String(a.date)))})).filter(s=>s.observations.length);\n$(\"endpoint\").textContent=\"FRED · US MACRO INDICATORS\";\n$(\"headline\").textContent=\"Treasury & Macro Intelligence\";\n$(\"summary\").textContent=\"Latest observations returned by FRED. Values and dates are shown exactly as returned by the endpoint.\";\n$(\"status\").textContent=envelope.paid===true?\"Paid result\":\"FRED data loaded\";\n$(\"status\").className=\"pill \"+(envelope.paid===true?\"ok\":\"\");\n$(\"cards\").innerHTML=latest.map(s=>{const a=s.observations[0],b=s.observations[1],v=Number(a.value),prev=b?Number(b.value):NaN,delta=Number.isFinite(prev)?v-prev:NaN;const fmtN=n=>Number.isFinite(n)?n.toLocaleString(undefined,{maximumFractionDigits:4}):String(n);return '<div class=\"card\"><div class=\"label\">'+esc(s.series||\"Series\")+'</div><div class=\"value\">'+esc(fmtN(v))+(s.series===\"DGS10\"||s.series===\"DFF\"||s.series===\"UNRATE\"?\"%\":\"\")+'</div><div class=\"sub\">'+esc(s.name||\"FRED indicator\")+' · '+esc(a.date||\"latest\")+'</div>'+(Number.isFinite(delta)?'<div class=\"sub\">Change vs prior: '+(delta>0?\"+\":\"\")+esc(fmtN(delta))+'</div>':\"\")+'</div>'}).join(\"\");\nconst allDates=[...new Set(obsRows.map(r=>r.date))].sort();\nconst chosen=latest.find(s=>s.series===\"DGS10\")||latest[0];\nconst points=chosen?chosen.observations.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date))):[];\nlet chart=\"\";\nif(points.length){\nconst vals=points.map(o=>Number(o.value)).filter(Number.isFinite),w=640,h=210,pad=30,min=Math.min(...vals),max=Math.max(...vals),span=max-min||1;\nconst coords=points.map((o,i)=>({x:pad+(points.length===1?(w-2*pad)/2:i*(w-2*pad)/(points.length-1)),y:h-pad-((Number(o.value)-min)/span)*(h-2*pad),o}));\nchart='<div class=\"panelhead\"><strong>'+esc(chosen.name||chosen.series)+' · trend</strong><span class=\"pill\">'+points.length+' observations</span></div><div style=\"width:100%;overflow:auto\"><svg viewBox=\"0 0 '+w+' '+h+'\" role=\"img\" aria-label=\"FRED observation trend\" style=\"width:100%;min-width:280px;height:auto;display:block\"><line x1=\"'+pad+'\" y1=\"'+(h-pad)+'\" x2=\"'+(w-pad)+'\" y2=\"'+(h-pad)+'\" stroke=\"#273446\"/><line x1=\"'+pad+'\" y1=\"'+pad+'\" x2=\"'+pad+'\" y2=\"'+(h-pad)+'\" stroke=\"#273446\"/><polyline fill=\"none\" stroke=\"#f7931a\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" points=\"'+coords.map(c=>c.x+\",\"+c.y).join(\" \")+'\"/>'+coords.map(c=>'<circle cx=\"'+c.x+'\" cy=\"'+c.y+'\" r=\"4\" fill=\"#f7931a\"><title>'+esc(c.o.date)+\": \"+esc(c.o.value)+'</title></circle>').join(\"\")+coords.map(c=>'<text x=\"'+c.x+'\" y=\"'+(h-8)+'\" text-anchor=\"middle\" font-size=\"10\" fill=\"#98a8bb\">'+esc(String(c.o.date).slice(5))+'</text>').join(\"\")+'</svg></div><div class=\"sub\">Chart shows '+esc(chosen.series)+' only. Select Data table to compare all returned series.</div>';\n}\n$(\"bars\").innerHTML=chart||'<div class=\"empty\">No numeric observations available to chart.</div>';\nrows=obsRows;\n$(\"raw\").textContent=JSON.stringify(envelope,null,2);\nrenderTable();\nsetTab(\"overview\");\n}\nfunction render(data){payload=data||{};if(isFred(payload)){renderFred(payload);return;}const meta=payload.endpoint||payload.path||payload.resource_url||payload.name||'Research response';const root=payload.data&&typeof payload.data==='object'?payload.data:payload;const etfWidget=String(meta).includes('/api/etf/');const etfTab=document.querySelector('[data-tab=\"latestflows\"]');if(etfTab)etfTab.hidden=!etfWidget;$('endpoint').textContent=String(meta).toUpperCase();$('headline').textContent=payload.title||payload.description||'Research results';$('summary').textContent=payload.summary||payload.note||'Interactive view of the returned data. Values below come from the tool result.';$('status').textContent=payload.paid===true?'Paid result':payload.stated_price_usd!=null?'Payment proposal':'Data loaded';$('status').className='pill '+(payload.paid===true?'ok':'');\nconst fields=flatten(root).filter(([k,v])=>!['raw','content','structuredContent'].includes(k)&&v!==undefined).slice(0,8);$('cards').innerHTML=fields.length?fields.slice(0,8).map(([k,v])=>'<div class=\"card\"><div class=\"label\">'+esc(k)+'</div><div class=\"value\">'+esc(fmt(v))+'</div><div class=\"sub\">From response</div></div>').join(''):'<div class=\"card\"><div class=\"label\">Response</div><div class=\"value\">Loaded</div></div>';\nlet list=Array.isArray(root)?root:(Array.isArray(root.data)?root.data:Array.isArray(root.results)?root.results:Array.isArray(root.records)?root.records:Array.isArray(root.items)?root.items:null);if(!list)list=fields.map(([key,value])=>({field:key,value}));rows=list.map(x=>x&&typeof x==='object'?x:{value:x});\n$('raw').textContent=JSON.stringify(payload,null,2);renderTable();renderBars();setTab('overview')}\nfunction renderTable(){const q=$('filter').value.toLowerCase();const filtered=rows.filter(r=>JSON.stringify(r).toLowerCase().includes(q));const cols=[...new Set(filtered.flatMap(r=>Object.keys(r||{})))].slice(0,12);$('tablebody').innerHTML=filtered.length?'<table><thead><tr>'+cols.map(c=>'<th>'+esc(c)+'</th>').join('')+'</tr></thead><tbody>'+filtered.slice(0,250).map(r=>'<tr>'+cols.map(c=>'<td>'+esc(fmt(r?.[c]))+'</td>').join('')+'</tr>').join('')+'</tbody></table>':'<div class=\"empty\">No matching records.</div>'}\nfunction renderBars(){const numeric=flatten(payload).filter(([k,v])=>typeof v==='number'&&Number.isFinite(v)).slice(0,12);if(!numeric.length){$('bars').innerHTML='<div class=\"empty\">No numeric fields in this response. Open Data table or Raw JSON to inspect the full result.</div>';return}const max=Math.max(1,...numeric.map(x=>Math.abs(x[1])));$('bars').innerHTML=numeric.map(([k,v])=>'<div class=\"barrow\"><span title=\"'+esc(k)+'\">'+esc(k.length>26?k.slice(0,24)+'…':k)+'</span><div class=\"track\"><div class=\"fill\" style=\"width:'+Math.max(2,Math.abs(v)/max*100)+'%\"></div></div><strong>'+esc(fmt(v))+'</strong></div>').join('')}\nfunction setTab(name){document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));['overview','latestflows','table','json'].forEach(id=>$(id).hidden=id!==name)}\ndocument.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));$('filter').addEventListener('input',renderTable);$('copy').addEventListener('click',()=>{try{navigator.clipboard?.writeText(JSON.stringify(payload,null,2));$('copy').textContent='Copied'}catch{$('copy').textContent='Select JSON to copy'}});\nwindow.addEventListener('message',event=>{const d=event.data;if(!d)return;const msg=d.jsonrpc?d:d.message;if(!msg)return;if(msg.method==='ui/notifications/tool-result'||msg.method==='notifications/tool-result'){const p=findData(msg);if(p)render(p)}else{const p=findData(msg);if(p&&Object.keys(p).length>0)render(p)}});\ntry{if(window.parent!==window)window.parent.postMessage({jsonrpc:'2.0',method:'ui/notifications/initialized',params:{}},'*')}catch(e){}\n})();\n</script></body></html>";
+
+const routeRows = [
+  ['/api/etf/summary', 0.02, 'Crypto ETF flow summary', {}],
+  ['/api/etf/flows', 0.02, 'Crypto ETF flows by asset', {asset:'BTC',period:'30d'}],
+  ['/api/etf/fund-flows', 0.02, 'Crypto ETF fund-level flows', {asset:'BTC'}],
+  ['/api/etf/funds', 0.02, 'Crypto ETF funds', {asset:'BTC'}],
+  ['/api/etf/cefi', 0.02, 'CeFi index data', {}],
+  ['/api/etf/prices', 0.02, 'Crypto ETF prices', {}],
+  ['/api/etf/weekly', 0.02, 'Weekly ETF analytics', {}],
+  ['/api/etf/tickers', 0.02, 'Supported ETF tickers', {}],
+  ['/api/macro/indicators', 0.01, 'FRED US economic indicators: latest observations for Federal Reserve interest rates, 10-year Treasury yield, consumer inflation (CPI), PCE inflation, unemployment, and GDP. Set series to one or more comma-separated IDs: DFF,DGS10,CPIAUCSL,PCEPI,UNRATE,GDP. Defaults to DFF,DGS10,CPIAUCSL,UNRATE. Returns up to 2 latest numeric observations per series with date and value. Requires server-side FRED_API_KEY; live x402 payment protection is not confirmed.', {series:'DFF,DGS10,CPIAUCSL,UNRATE'}],
+  ['/api/bea/gdp', 0.01, 'BEA GDP data', {year:'2026'}],
+  ['/api/bea/inflation', 0.01, 'BEA PCE inflation', {year:'2026'}],
+  ['/api/bea/personal-income', 0.01, 'BEA personal income', {year:'2026'}],
+  ['/api/bea/corporate-profits', 0.01, 'BEA corporate profits', {year:'2026'}],
+  ['/api/bea/trade', 0.01, 'BEA trade data', {year:'2026'}],
+  ['/api/bea/international-investment', 0.01, 'BEA international investment', {year:'2026'}],
+  ['/api/bea/gdp-by-industry', 0.01, 'BEA GDP by industry', {year:'2026'}],
+];
+const routes = Object.fromEntries(routeRows.map(([path, price, description, examples]) => [path, {path, price, description, examples}]));
+const requiredParams = {
+  '/api/etf/flows':['asset'], '/api/etf/fund-flows':['asset'], '/api/etf/funds':['asset'],
+};
+const tool = (name, description, properties = {}, required = []) => ({
+  name, description,
+  inputSchema: {type:'object', properties, required, additionalProperties:false},
+  outputSchema: {type:'object', additionalProperties:true},
+  _meta: {ui:{resourceUri:UI_RESOURCE_URI, visibility:['model','app']}}
+});
+const string = (description, extra = {}) => ({type:'string', description, ...extra});
+const tools = [
+  tool('get_api_health', 'Check the live x402 ETF & Macro Intelligence API health endpoint. This is free and does not make a paid request.'),
+  tool('list_research_endpoints', 'List available ETF, macro, and market research endpoints with stated per-request prices and required query parameters.'),
+  tool('get_openapi_spec', 'Retrieve the live OpenAPI specification to inspect endpoint documentation. This is a free documentation request.'),
+  tool('propose_paid_research', 'For a buyer request, complete the whole flow autonomously when the host exposes PayBox native use_service: prepare the allowlisted resource URL, call use_service with that exact URL and the authorized wallet credential, wait for terminal status, and only after payment.status is succeeded pass the actual resource body to show_research_dashboard. Do not ask the buyer to call show_research_dashboard manually. The final user-visible result must be the interactive research dashboard, not a prose summary or raw JSON. Never claim paid=true unless PayBox confirms payment success. This proposal tool itself does not pay.', {
+    endpoint: {type:'string', enum:routeRows.map(r=>r[0]), description:'Exact paid endpoint path from list_research_endpoints.'},
+    query: {type:'object', description:'Query parameters for the selected endpoint. Values must be strings, integers, or booleans; only simple query parameters are accepted.', additionalProperties:{oneOf:[{type:'string'},{type:'integer'},{type:'boolean'}]}},
+    network: {type:'string', enum:['base','solana'], default:'base', description:'Payment network for the proposal. Defaults to Base USDC.'}
+  }, ['endpoint']),
+  tool('propose_etf_summary', 'For a buyer request, autonomously prepare this ETF summary URL, call PayBox native use_service with the exact URL and authorized wallet credential, wait for confirmed payment success, then call show_research_dashboard with the actual returned resource body. Do not ask the buyer to invoke the dashboard tool manually. The final result should be the interactive UI, not prose or raw JSON. This tool alone does not pay.', {network:{type:'string',enum:['base','solana'],default:'base'} }),
+  tool('propose_etf_flows', 'For a buyer request, autonomously prepare this ETF flow URL, call PayBox native use_service with the exact URL and authorized wallet credential, wait for confirmed payment success, then call show_research_dashboard with the actual returned resource body. Do not ask the buyer to invoke the dashboard tool manually. The final result should be the interactive UI, not prose or raw JSON. This tool alone does not pay.', {asset:{type:'string',enum:['BTC','ETH','SOL','XRP','DOGE','LINK','AVAX','BNB','DOT','SUI'],default:'BTC'},period:{type:'string',default:'30d',pattern:'^[1-9][0-9]{0,2}d$'},network:{type:'string',enum:['base','solana'],default:'base'}}),
+  tool('propose_etf_fund_flows', 'For a buyer request, autonomously prepare this fund-level ETF flow URL, call PayBox native use_service with the exact URL and authorized wallet credential, wait for confirmed payment success, then call show_research_dashboard with the actual returned resource body. Do not ask the buyer to invoke the dashboard tool manually. The final result should be the interactive UI, not prose or raw JSON. This tool alone does not pay.', {asset:{type:'string',enum:['BTC','ETH','SOL','XRP','DOGE','LINK','AVAX','BNB','DOT','SUI'],default:'BTC'},network:{type:'string',enum:['base','solana'],default:'base'}}),
+  tool('propose_etf_funds', 'For a buyer request, autonomously prepare this ETF funds URL, call PayBox native use_service with the exact URL and authorized wallet credential, wait for confirmed payment success, then call show_research_dashboard with the actual returned resource body. Do not ask the buyer to invoke the dashboard tool manually. The final result should be the interactive UI, not prose or raw JSON. This tool alone does not pay.', {asset:{type:'string',enum:['BTC','ETH','SOL','XRP','DOGE','LINK','AVAX','BNB','DOT','SUI'],default:'BTC'},network:{type:'string',enum:['base','solana'],default:'base'}}),
+  tool('propose_etf_prices', 'For a buyer request, autonomously prepare this ETF prices URL, call PayBox native use_service with the exact URL and authorized wallet credential, wait for confirmed payment success, then call show_research_dashboard with the actual returned resource body. Do not ask the buyer to invoke the dashboard tool manually. The final result should be the interactive UI, not prose or raw JSON. This tool alone does not pay.', {network:{type:'string',enum:['base','solana'],default:'base'}}),
+  tool('propose_macro_indicators', 'FRED US Economic Indicators — get the latest available observations for key US macro data. Choose one or more series: DFF = effective federal funds interest rate; DGS10 = 10-year US Treasury yield; CPIAUCSL = consumer price index (CPI); PCEPI = personal consumption expenditures price index (PCE inflation measure); UNRATE = unemployment rate; GDP = gross domestic product. Pass series IDs comma-separated. Defaults to DFF,DGS10,CPIAUCSL,UNRATE. Returns up to two latest numeric observations per series, including observation date and value. Example: /api/macro/indicators?series=DGS10 or ?series=CPIAUCSL,UNRATE. Requires the server operator to configure FRED_API_KEY. Endpoint payment protection is not yet verified, so confirm the live response before assuming an x402 charge.', {series:string('Select FRED series IDs separated by commas. DFF (Fed funds rate), DGS10 (10-year Treasury yield), CPIAUCSL (CPI), PCEPI (PCE price index), UNRATE (unemployment), GDP (GDP). Defaults to DFF,DGS10,CPIAUCSL,UNRATE.',{default:'DFF,DGS10,CPIAUCSL,UNRATE',examples:['DFF','DGS10','CPIAUCSL','PCEPI','UNRATE','GDP','DGS10,UNRATE']}),network:{type:'string',enum:['base','solana'],default:'base'}}),
+
+  tool('show_research_dashboard', 'Render a paid research result as an interactive dashboard in MCP Apps-capable buyer clients. ETF dashboards also include a CryptoETF latest-daily-flows embed. Call this after the buyer client has fetched the actual endpoint result and payment is confirmed; pass the returned data without inventing or changing values. This tool does not fetch data or make payment.', {
+    endpoint: string('Endpoint path or research category'),
+    title: string('Optional dashboard title'),
+    summary: string('Optional short factual summary based on the result'),
+    source: string('Optional data source label'),
+    paid_usd: {type:'number',minimum:0},
+    paid: {type:'boolean',default:false},
+    data: {type:['object','array','string','number','boolean','null'],description:'The actual JSON response returned by the paid endpoint. Pass the endpoint body unchanged; objects and arrays are supported.'}
+  }, ['endpoint','data']),
+];
+
+function rpcResponse(id, result) { return {jsonrpc:'2.0', id, result:{...result, resultType:'complete'}}; }
+function rpcError(id, code, message) { return {jsonrpc:'2.0', id, error:{code, message}}; }
+function toolResult(value) {
+  const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+  return {content:[{type:'text',text}], structuredContent:value && typeof value === 'object' ? value : {result:value}, isError:false};
+}
+function parseObject(value, label) {
+  if (value === undefined || value === null) return {};
+  if (typeof value !== 'object' || Array.isArray(value)) throw new Error(`${label} must be a JSON object.`);
+  return value;
+}
+function queryUrl(path, query) {
+  const url = new URL(path, BASE_URL);
+  for (const [key, value] of Object.entries(query)) {
+    if (!/^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(key)) throw new Error(`Invalid query parameter name: ${key}`);
+    if (!['string','number','boolean'].includes(typeof value)) throw new Error(`Query parameter ${key} must be a string, number, or boolean.`);
+    const str = String(value);
+    if (str.length > 500 || /[\u0000-\u001f\u007f]/.test(str)) throw new Error(`Invalid value for query parameter ${key}.`);
+    url.searchParams.set(key, str);
+  }
+  return url.toString();
+}
+function makeProposal(path, query, network) {
+  const route = routes[path];
+  if (!route) throw new Error('Endpoint is not allowlisted. Use list_research_endpoints to see supported paths.');
+  const params = parseObject(query, 'query');
+  const allowed = new Set(Object.keys(route.examples));
+  const commonOptional = new Set(['limit','page','from','to','period','asset','exchange','name','symbol','cik','query','company','series']);
+  for (const key of Object.keys(params)) {
+    if (allowed.size ? !allowed.has(key) && !commonOptional.has(key) : !commonOptional.has(key)) throw new Error(`Query parameter '${key}' is not supported for ${path}.`);
+  }
+  for (const key of (requiredParams[path] || [])) {
+    if (params[key] === undefined || params[key] === null || String(params[key]).trim() === '') throw new Error(`Missing required query parameter '${key}' for ${path}.`);
+  }
+  if (path === '/api/etf/flows' || path === '/api/etf/fund-flows' || path === '/api/etf/funds') {
+    if (params.asset !== undefined && !/^[A-Z0-9]{2,10}$/.test(String(params.asset))) throw new Error('asset must be an uppercase asset symbol such as BTC or ETH.');
+  }
+  if (params.period !== undefined && !/^[1-9][0-9]{0,2}d$/.test(String(params.period))) throw new Error('period must look like 7d or 30d.');
+  if (network !== 'base' && network !== 'solana') throw new Error('network must be base or solana.');
+  const resourceUrl = queryUrl(path, params);
+  return {
+    resource_url: resourceUrl,
+    method: 'GET',
+    endpoint: path,
+    stated_price_usd: route.price,
+    preferred_network: network === 'base' ? 'eip155:8453' : 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
+    payment_protocol: 'x402 v2',
+    next_action: 'Call PayBox native use_service with this exact resource_url and an authorized wallet credential. Let PayBox inspect the live 402 challenge and choose a supported accepted payment rail.',
+    paid: false,
+    note: 'This tool only prepares the resource URL. No payment was attempted and no paid data was fetched. The live 402 challenge is authoritative for price and accepted networks.'
+  };
+}
+async function getJson(url) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 9000);
+  try {
+    const res = await fetch(url, {headers:{accept:'application/json'}, signal:controller.signal, redirect:'error'});
+    const raw = await res.text();
+    let data;
+    try { data = JSON.parse(raw); } catch { data = {raw:raw.slice(0, MAX_RESPONSE_CHARS)}; }
+    if (!res.ok) throw new Error(`API returned HTTP ${res.status}: ${JSON.stringify(data).slice(0,1800)}`);
+    return data;
+  } finally { clearTimeout(timer); }
+}
+async function callTool(name, args) {
+  args = parseObject(args, 'Tool arguments');
+  switch(name) {
+    case 'show_research_dashboard': {
+      const rawData = args.data;
+      if (rawData === undefined) throw new Error('data is required; pass the actual endpoint response body.');
+      const data = rawData && typeof rawData === 'object' ? (Array.isArray(rawData) ? {results:rawData} : rawData) : {value:rawData};
+      return {endpoint:args.endpoint,title:args.title || args.endpoint,summary:args.summary || 'Interactive visualization of the paid endpoint response.',source:args.source || 'x402 ETF & Macro Intelligence',paid:args.paid === true,paid_usd:args.paid_usd, data};
+    }
+    case 'get_api_health': return await getJson(`${BASE_URL}/api/health`);
+    case 'get_openapi_spec': return await getJson(`${BASE_URL}/openapi.json`);
+    case 'list_research_endpoints': return {base_url:BASE_URL, payment_protocol:'x402 v2', networks:['Base USDC (eip155:8453)','Solana USDC (solana:mainnet)'], endpoints:routeRows.map(([path,price,description,examples])=>({path,method:'GET',description,price_usd:price,required_query_parameters:requiredParams[path]||[],example_query:examples})), note:'Prices are stated by this API; the live 402 challenge is authoritative before any payment.'};
+    case 'propose_paid_research': return makeProposal(args.endpoint, args.query, args.network ?? 'base');
+    case 'propose_etf_summary': return makeProposal('/api/etf/summary', {}, args.network ?? 'base');
+    case 'propose_etf_flows': return makeProposal('/api/etf/flows', {asset:args.asset ?? 'BTC',period:args.period ?? '30d'}, args.network ?? 'base');
+    case 'propose_etf_fund_flows': return makeProposal('/api/etf/fund-flows', {asset:args.asset ?? 'BTC'}, args.network ?? 'base');
+    case 'propose_etf_funds': return makeProposal('/api/etf/funds', {asset:args.asset ?? 'BTC'}, args.network ?? 'base');
+    case 'propose_etf_prices': return makeProposal('/api/etf/prices', {}, args.network ?? 'base');
+    case 'propose_macro_indicators': return makeProposal('/api/macro/indicators', {series:args.series ?? 'DFF,DGS10,CPIAUCSL,UNRATE'}, args.network ?? 'base');
+    default: throw new Error(`Unknown tool: ${name}`);
+  }
+}
+async function dispatch(msg) {
+  const {id,method,params={}} = msg || {};
+  if (method === 'initialize') return rpcResponse(id, {protocolVersion:params.protocolVersion || '2024-11-05',capabilities:{tools:{listChanged:false},resources:{listChanged:false}},serverInfo:{name:'x402-etf-macro-intelligence',version:'1.0.1'},instructions:'For paid research requests, first prepare the allowlisted URL with the appropriate propose_* tool. Then use the host PayBox use_service capability to call that exact URL and wait for confirmed payment success. After success, immediately call show_research_dashboard with endpoint set to the exact API path and data set to the actual returned response body; set paid:true only when PayBox confirms success. Do not stop at a proposal, do not ask the buyer to call the dashboard manually, and do not invent or alter returned data. The dashboard tool is a separate MCP call because this server cannot invoke the host wallet/payment tool itself. MCP Apps UI is shown only by clients that support MCP Apps.'});
+  if (method === 'ping') return rpcResponse(id, {});
+  if (method === 'tools/list') return rpcResponse(id, {tools});
+  if (method === 'tools/call') {
+    try { return rpcResponse(id, toolResult(await callTool(params.name, params.arguments || {}))); }
+    catch(e) { return rpcResponse(id, {content:[{type:'text',text:e instanceof Error ? e.message : 'Tool failed'}],isError:true,resultType:'complete'}); }
+  }
+  if (method === 'resources/list') return rpcResponse(id, {resources:[{uri:UI_RESOURCE_URI,name:'Research Dashboard',description:'Interactive dashboard shared by all ETF, macro, Treasury, and BEA research tools.',mimeType:'text/html;profile=mcp-app',_meta:{ui:{prefersBorder:true}}}]});
+  if (method === 'resources/read') {
+    const uri = params?.uri;
+    if (uri !== UI_RESOURCE_URI) return rpcError(id, -32602, `Unknown resource URI: ${uri}`);
+    return rpcResponse(id, {contents:[{uri:UI_RESOURCE_URI,mimeType:'text/html;profile=mcp-app',text:DASHBOARD_HTML,_meta:{ui:{csp:{connectDomains:[],resourceDomains:[],frameDomains:['https://cryptoetf.today'],baseUriDomains:[]},prefersBorder:true}}}]});
+  }
+  if (method === 'prompts/list') return rpcResponse(id, {prompts:[]});
+  if (method?.startsWith('notifications/')) return null;
+  return rpcError(id ?? null, -32601, `Method not found: ${method}`);
+}
+let buffer = '';
+process.stdin.setEncoding('utf8');
+process.stdin.on('data', chunk => {
+  buffer += chunk;
+  if (buffer.length > 1024 * 1024) { process.stderr.write('Input buffer exceeded 1 MiB.\n'); process.exit(1); }
+  let index;
+  while ((index = buffer.indexOf('\n')) >= 0) {
+    const line = buffer.slice(0,index).trim(); buffer = buffer.slice(index+1);
+    if (!line) continue;
+    (async () => {
+      let message;
+      try { message = JSON.parse(line); } catch { process.stdout.write(JSON.stringify(rpcError(null,-32700,'Parse error'))+'\n'); return; }
+      if (message.id === undefined && message.method?.startsWith('notifications/')) return;
+      const result = await dispatch(message);
+      if (result) process.stdout.write(JSON.stringify(result)+'\n');
+    })().catch(e => process.stderr.write(`Dispatch error: ${e?.message || 'unknown'}\n`));
+  }
+});
+process.stdin.on('end', () => { if (buffer.trim()) process.stderr.write('Ignored incomplete final JSON line.\n'); });
