@@ -723,33 +723,138 @@
     },
     "/api/macro/indicators": {
       "get": {
-        "summary": "FRED macroeconomic indicators",
-        "operationId": "macro_indicators",
+        "summary": "Latest observations for supported FRED macroeconomic series",
+        "description": "Returns up to two latest numeric observations per requested series from the Federal Reserve Bank of St. Louis FRED API. Requires FRED_API_KEY in the deployed environment. This route currently has no x402 payment middleware confirmed; the OpenAPI security declaration is therefore empty.",
+        "operationId": "fred_macro_indicators",
         "parameters": [
           {
             "name": "series",
             "in": "query",
-            "required": true,
-            "description": "Comma-separated FRED series IDs. Defaults to DFF,DGS10,CPIAUCSL,PCEPI,UNRATE.",
+            "required": false,
+            "description": "Comma-separated FRED series IDs. Supported IDs: DFF (Federal Funds Effective Rate), DGS10 (10-Year Treasury Constant Maturity Rate), CPIAUCSL (CPI for All Urban Consumers), PCEPI (Personal Consumption Expenditures Price Index), UNRATE (Unemployment Rate), GDP (Gross Domestic Product). Defaults to DFF,DGS10,CPIAUCSL,UNRATE.",
             "schema": {
               "type": "string",
-              "default": "DFF,DGS10,CPIAUCSL,PCEPI,UNRATE"
+              "default": "DFF,DGS10,CPIAUCSL,UNRATE",
+              "examples": [
+                "DFF",
+                "DGS10",
+                "CPIAUCSL",
+                "PCEPI",
+                "UNRATE",
+                "GDP",
+                "DFF,DGS10,UNRATE"
+              ]
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Time-series observations",
+            "description": "Latest observations retrieved from FRED",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiSuccess"
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "source": {
+                      "type": "string",
+                      "example": "FRED"
+                    },
+                    "source_url": {
+                      "type": "string",
+                      "format": "uri",
+                      "example": "https://fred.stlouisfed.org/"
+                    },
+                    "retrieved_at": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "requested_series": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "DFF",
+                          "DGS10",
+                          "CPIAUCSL",
+                          "PCEPI",
+                          "UNRATE",
+                          "GDP"
+                        ]
+                      }
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "series": {
+                            "type": "string",
+                            "example": "DGS10"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "10-Year Treasury Constant Maturity Rate"
+                          },
+                          "status": {
+                            "type": "string",
+                            "enum": [
+                              "ok"
+                            ]
+                          },
+                          "observations": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "date": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "value": {
+                                  "type": "number"
+                                },
+                                "realtime_start": {
+                                  "type": "string",
+                                  "format": "date"
+                                },
+                                "realtime_end": {
+                                  "type": "string",
+                                  "format": "date"
+                                }
+                              },
+                              "required": [
+                                "date",
+                                "value"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "series",
+                          "name",
+                          "status",
+                          "observations"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "source",
+                    "source_url",
+                    "retrieved_at",
+                    "requested_series",
+                    "data"
+                  ]
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid or missing input parameters",
+            "description": "Missing or unsupported series ID",
             "content": {
               "application/json": {
                 "schema": {
@@ -758,26 +863,18 @@
               }
             }
           },
-          "402": {
-            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
-            "headers": {
-              "PAYMENT-REQUIRED": {
-                "description": "Base64-encoded x402 v2 payment requirements",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            },
+          "502": {
+            "description": "FRED provider error or timeout; check the FRED API key and upstream response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/X402PaymentRequired"
+                  "$ref": "#/components/schemas/ApiError"
                 }
               }
             }
           },
           "503": {
-            "description": "Provider configuration or upstream service unavailable",
+            "description": "FRED_API_KEY is missing from the deployed environment",
             "content": {
               "application/json": {
                 "schema": {
@@ -787,21 +884,7 @@
             }
           }
         },
-        "x-payment-info": {
-          "protocols": [
-            "x402"
-          ],
-          "price": {
-            "mode": "fixed",
-            "currency": "USD",
-            "amount": "0.01"
-          }
-        },
-        "security": [
-          {
-            "X402Payment": []
-          }
-        ]
+        "security": []
       }
     },
     "/api/health": {
@@ -2280,13 +2363,6 @@
         "additionalProperties": true
       }
     },
-    "securitySchemes": {
-      "X402Payment": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "PAYMENT-SIGNATURE",
-        "description": "x402 v2 payment signature. Requests without payment should receive HTTP 402 and a PAYMENT-REQUIRED challenge."
-      }
-    }
+    "securitySchemes": {}
   }
 }
