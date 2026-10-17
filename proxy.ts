@@ -1,5 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { HTTPFacilitatorClient, x402ResourceServer, type RoutesConfig } from "@x402/core/server";
+
+// x402scan requires Bazaar discovery metadata in the live HTTP 402 challenge;
+// OpenAPI parameters alone are not enough for its endpoint-level registration probe.
 import { registerExactEvmScheme } from "@x402/evm/exact/server";
 import { registerExactSvmScheme } from "@x402/svm/exact/server";
 
@@ -66,6 +69,60 @@ const requiredQueryParams: Record<string, string[]> = {
   "/api/fmp/economic-indicators": ["name"]
 };
 
+const bazaarSchema = {
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  type: "object",
+  properties: {
+    input: {
+      type: "object",
+      properties: {
+        type: { type: "string", const: "http" },
+        method: { type: "string", enum: ["GET"] },
+        queryParams: {
+          type: "object",
+          additionalProperties: { type: "string" }
+        }
+      },
+      required: ["type", "method", "queryParams"],
+      additionalProperties: false
+    },
+    output: {
+      type: "object",
+      properties: {
+        type: { type: "string", const: "json" },
+        example: {}
+      },
+      required: ["type"],
+      additionalProperties: false
+    }
+  },
+  required: ["input"],
+  additionalProperties: false
+};
+
+function makeBazaarExtension(route: (typeof routeDefinitions)[number]) {
+  return {
+    bazaar: {
+      info: {
+        input: {
+          type: "http",
+          method: "GET",
+          queryParams: route.queryParams ?? {}
+        },
+        output: {
+          type: "json",
+          example: {
+            success: true,
+            data: [],
+            endpoint: route.path
+          }
+        }
+      },
+      schema: bazaarSchema
+    }
+  };
+}
+
 function makeRouteConfig() {
   if (!BASE_PAY_TO && !SOLANA_PAY_TO) return null;
   return Object.fromEntries(routeDefinitions.map((route) => {
@@ -77,6 +134,7 @@ function makeRouteConfig() {
       accepts,
       description: route.description,
       mimeType: "application/json",
+      extensions: makeBazaarExtension(route),
     }];
   })) as unknown as RoutesConfig;
 }
