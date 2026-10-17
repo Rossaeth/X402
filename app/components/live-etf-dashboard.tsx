@@ -52,7 +52,8 @@ export default function LiveEtfDashboard() {
       if (failed) {
         const message = failed.body?.message || failed.body?.error?.message || failed.body?.error || `API returned HTTP ${failed.status}`;
         setError(String(message));
-        if (failed.status === 503) setError("CryptoETF.today API key belum dikonfigurasi di Vercel. Tambahkan CRYPTOETF_API_KEY pada Environment Variables lalu redeploy.");
+        if (failed.status === 402) setError("Endpoint data ini dilindungi x402. Dashboard browser belum menyelesaikan pembayaran otomatis; panggil endpoint lewat agent/PayBox yang mendukung x402 untuk menerima data.");
+        if (failed.status === 503) setError("Provider API key belum tersedia atau layanan upstream sedang tidak siap. Periksa Environment Variables di Vercel.");
       } else {
         setError("");
         setSummary(payload<Summary>(bodies[0].body));
@@ -99,7 +100,7 @@ export default function LiveEtfDashboard() {
           <p className="muted small">CryptoETF.today REST API · server-side key protection · refreshes every 60 seconds</p>
         </div>
         <div className="live-controls">
-          <span className={error ? "live-status is-error" : "live-status"}><i />{error ? "Provider issue" : loading ? "Connecting…" : "API connected"}</span>
+          <span className={error ? "live-status is-error" : "live-status"}><i />{error ? (error.includes("x402") ? "Payment required" : "Data unavailable") : loading ? "Connecting…" : "API connected"}</span>
           <button className="refresh-button" onClick={() => void load(asset)} disabled={refreshing}>{refreshing ? "Refreshing…" : "↻ Refresh"}</button>
         </div>
       </div>
@@ -144,7 +145,7 @@ export default function LiveEtfDashboard() {
           <div className="agent-endpoint"><span>Spot prices</span><code>GET /api/etf/prices</code><a href="/api/etf/prices">Try endpoint ↗</a></div>
           <div className="agent-endpoint"><span>CEFI sentiment</span><code>GET /api/etf/cefi</code><a href="/api/etf/cefi">Try endpoint ↗</a></div>
           <div className="agent-command"><strong>Example · cURL</strong><pre>{`curl "${typeof window !== "undefined" ? window.location.origin : "https://x402-etf-macro-intelligence.vercel.app"}/api/etf/flows?asset=BTC&period=30d"`}</pre><button className="refresh-button" onClick={() => { void navigator.clipboard?.writeText(`curl "${window.location.origin}/api/etf/flows?asset=BTC&period=30d"`); }}>Copy example</button></div>
-          <p className="agent-note">Note: these routes are currently read-only REST endpoints. x402 payment verification is not enabled yet, so do not assume a 402 challenge is active.</p>
+          <p className="agent-note">These read-only REST endpoints may require x402 payment. If a request returns HTTP 402, use an x402-compatible agent or PayBox flow to complete payment before retrying.</p>
         </div>
       </div>
       <div className="live-footnote">Last page refresh: {lastRefresh ? dateText(lastRefresh) : "—"}. ETF flow figures update on the provider’s publication schedule; prices may refresh more frequently. This is market research, not investment advice.</div>
