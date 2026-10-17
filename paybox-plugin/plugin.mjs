@@ -18,10 +18,6 @@ const routeRows = [
   ['/api/etf/prices', 0.02, 'Crypto ETF prices', {}],
   ['/api/etf/weekly', 0.02, 'Weekly ETF analytics', {}],
   ['/api/etf/tickers', 0.02, 'Supported ETF tickers', {}],
-  ['/api/fmp/commodities-list', 0.01, 'FMP commodities list', {}],
-  ['/api/fmp/biggest-gainers', 0.01, 'Biggest market gainers', {}],
-  ['/api/fmp/biggest-losers', 0.01, 'Biggest market losers', {}],
-  ['/api/fmp/most-actives', 0.01, 'Most actively traded stocks', {}],
   ['/api/macro/indicators', 0.01, 'FRED US economic indicators: latest observations for Federal Reserve interest rates, 10-year Treasury yield, consumer inflation (CPI), PCE inflation, unemployment, and GDP. Set series to one or more comma-separated IDs: DFF,DGS10,CPIAUCSL,PCEPI,UNRATE,GDP. Defaults to DFF,DGS10,CPIAUCSL,UNRATE. Returns up to 2 latest numeric observations per series with date and value. Requires server-side FRED_API_KEY; live x402 payment protection is not confirmed.', {series:'DFF,DGS10,CPIAUCSL,UNRATE'}],
   ['/api/bea/gdp', 0.01, 'BEA GDP data', {year:'2026'}],
   ['/api/bea/inflation', 0.01, 'BEA PCE inflation', {year:'2026'}],
@@ -163,7 +159,7 @@ async function dispatch(msg) {
     try { return rpcResponse(id, toolResult(await callTool(params.name, params.arguments || {}))); }
     catch(e) { return rpcResponse(id, {content:[{type:'text',text:e instanceof Error ? e.message : 'Tool failed'}],isError:true,resultType:'complete'}); }
   }
-  if (method === 'resources/list') return rpcResponse(id, {resources:[{uri:UI_RESOURCE_URI,name:'Research Dashboard',description:'Interactive dashboard shared by all ETF, macro, Treasury, FMP, and BEA research tools.',mimeType:'text/html;profile=mcp-app',_meta:{ui:{prefersBorder:true}}}]});
+  if (method === 'resources/list') return rpcResponse(id, {resources:[{uri:UI_RESOURCE_URI,name:'Research Dashboard',description:'Interactive dashboard shared by all ETF, macro, Treasury, and BEA research tools.',mimeType:'text/html;profile=mcp-app',_meta:{ui:{prefersBorder:true}}}]});
   if (method === 'resources/read') {
     const uri = params?.uri;
     if (uri !== UI_RESOURCE_URI) return rpcError(id, -32602, `Unknown resource URI: ${uri}`);
