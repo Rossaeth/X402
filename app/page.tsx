@@ -59,7 +59,7 @@ export default function Home() {
         </a>
         <div className="header-meta">
           <span className="pill"><span className="status" /> X402 API</span>
-          <a className="header-link" href="/openapi.json">OpenAPI ↗</a>
+          <a className="header-link" href="/docs">API Reference ↗</a><a className="header-link" href="/openapi.json">OpenAPI JSON ↗</a>
         </div>
       </header>
 
