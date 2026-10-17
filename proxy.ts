@@ -52,6 +52,11 @@ const routeDefinitions: Array<{ path: string; price: string; description: string
 ];
 
 const requiredQueryParams: Record<string, string[]> = {
+  "/api/etf/flows": ["asset"],
+  "/api/etf/fund-flows": ["asset"],
+  "/api/etf/funds": ["asset"],
+  "/api/macro/calendar": ["from"],
+  "/api/macro/indicators": ["series"],
   "/api/fmp/profile-cik": ["cik"],
   "/api/fmp/stock-peers": ["symbol"],
   "/api/fmp/search-name": ["query"],
