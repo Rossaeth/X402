@@ -7,7 +7,7 @@ Next.js API and dashboard for crypto ETF flows, ETF sentiment, institutional fun
 - **FRED** — macroeconomic time series; configure `FRED_API_KEY`.
 - **FMP** — market and economic data; configure `FMP_API_KEY`.
 - **Crypto ETF provider** — configure `CRYPTOETF_API_KEY` and any required provider settings.
-- **BEA** — optional economic data provider if used by enabled routes.
+- **BEA** — official U.S. economic statistics through eight paid routes: `/api/bea/gdp`, `/api/bea/inflation`, `/api/bea/personal-income`, `/api/bea/corporate-profits`, `/api/bea/trade`, `/api/bea/international-investment`, `/api/bea/gdp-by-industry`, and `/api/bea/regional`. Configure `BEA_API_KEY` in Vercel.
 
 BLS and BlackRock-specific integrations have been removed from this project. Missing upstream providers should be reported explicitly; the API must not invent data.
 
