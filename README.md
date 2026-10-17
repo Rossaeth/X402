@@ -1,6 +1,6 @@
 # x402 ETF & Macro Intelligence
 
-Next.js API and dashboard for crypto ETF flows, ETF sentiment, institutional fund research, Federal Reserve events, US macro indicators, and research summaries.
+Next.js API and dashboard for crypto ETF flows, ETF sentiment, Federal Reserve events, US macro indicators, and research summaries.
 
 ## Data providers
 
