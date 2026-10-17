@@ -69,45 +69,37 @@ const requiredQueryParams: Record<string, string[]> = {
   "/api/fmp/economic-indicators": ["name"]
 };
 
-const bazaarSchema = {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  type: "object",
-  properties: {
-    input: {
-      type: "object",
-      properties: {
-        type: { type: "string", const: "http" },
-        method: { type: "string", enum: ["GET"] },
-        queryParams: {
-          type: "object",
-          additionalProperties: { type: "string" }
-        }
-      },
-      required: ["type", "method", "queryParams"],
-      additionalProperties: false
-    },
-    output: {
-      type: "object",
-      properties: {
-        type: { type: "string", const: "json" },
-        example: {}
-      },
-      required: ["type"],
-      additionalProperties: false
-    }
-  },
-  required: ["input"],
-  additionalProperties: false
-};
-
 function makeBazaarExtension(route: (typeof routeDefinitions)[number]) {
+  const exampleQueryParams = route.queryParams ?? {};
+  const requiredParams = requiredQueryParams[route.path] ?? [];
+  const queryParamProperties = Object.fromEntries(
+    Object.entries(exampleQueryParams).map(([name, example]) => [
+      name,
+      { type: "string", description: `Example value: ${example}` }
+    ])
+  );
+  const inputSchema = {
+    type: "object",
+    properties: {
+      type: { type: "string", const: "http" },
+      method: { type: "string", const: "GET" },
+      queryParams: {
+        type: "object",
+        properties: queryParamProperties,
+        additionalProperties: { type: "string" },
+        ...(requiredParams.length ? { required: requiredParams } : {})
+      }
+    },
+    required: ["type", "method", "queryParams"],
+    additionalProperties: false
+  };
   return {
     bazaar: {
       info: {
         input: {
           type: "http",
           method: "GET",
-          queryParams: route.queryParams ?? {}
+          queryParams: exampleQueryParams
         },
         output: {
           type: "json",
@@ -118,7 +110,24 @@ function makeBazaarExtension(route: (typeof routeDefinitions)[number]) {
           }
         }
       },
-      schema: bazaarSchema
+      schema: {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        type: "object",
+        properties: {
+          input: inputSchema,
+          output: {
+            type: "object",
+            properties: {
+              type: { type: "string", const: "json" },
+              example: {}
+            },
+            required: ["type"],
+            additionalProperties: false
+          }
+        },
+        required: ["input", "output"],
+        additionalProperties: false
+      }
     }
   };
 }
