@@ -44,6 +44,14 @@ const routeRows = [
   ['/api/fmp/fundraising', 0.01, 'Fundraising data by CIK', {cik:'0001547416'}],
   ['/api/macro/calendar', 0.01, 'Economic calendar', {from:'2026-01-01',to:'2026-01-31'}],
   ['/api/macro/indicators', 0.01, 'FRED macro indicators', {series:'DFF,DGS10,CPIAUCSL,UNRATE'}],
+  ['/api/bea/gdp', 0.01, 'BEA GDP data', {year:'LAST5'}],
+  ['/api/bea/inflation', 0.01, 'BEA PCE inflation', {year:'LAST5'}],
+  ['/api/bea/personal-income', 0.01, 'BEA personal income', {year:'LAST5'}],
+  ['/api/bea/corporate-profits', 0.01, 'BEA corporate profits', {year:'LAST5'}],
+  ['/api/bea/trade', 0.01, 'BEA trade data', {year:'LAST5'}],
+  ['/api/bea/international-investment', 0.01, 'BEA international investment', {year:'LAST5'}],
+  ['/api/bea/gdp-by-industry', 0.01, 'BEA GDP by industry', {year:'LAST5'}],
+  ['/api/bea/regional', 0.01, 'BEA regional data', {year:'LAST5'}],
 ];
 const routes = Object.fromEntries(routeRows.map(([path, price, description, examples]) => [path, {path, price, description, examples}]));
 const requiredParams = {
