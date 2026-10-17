@@ -6,13 +6,13 @@
     "description": "API for crypto ETF flows and macroeconomic data for AI agents. Paid-route metadata is declared below; runtime x402 payment enforcement must be deployed and verified before charges are enabled. Support: rossadi.ardian@gmail.com.",
     "contact": {
       "name": "API Support",
-      "url": "https://x402-etf-macro-intelligence.vercel.app",
+      "url": "https://x402-sand.vercel.app",
       "email": "darmauyeee@gmail.com"
     }
   },
   "servers": [
     {
-      "url": "https://x402-etf-macro-intelligence.vercel.app"
+      "url": "https://x402-sand.vercel.app"
     }
   ],
   "paths": {
@@ -83,6 +83,17 @@
         "security": [
           {
             "X402Payment": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": false,
+            "description": "Reserved optional input field for future filters; currently ignored by this endpoint.",
+            "schema": {
+              "type": "string"
+            }
           }
         ]
       }
@@ -450,6 +461,17 @@
           {
             "X402Payment": []
           }
+        ],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": false,
+            "description": "Reserved optional input field for future filters; currently ignored by this endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
         ]
       }
     },
@@ -520,6 +542,17 @@
         "security": [
           {
             "X402Payment": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": false,
+            "description": "Reserved optional input field for future filters; currently ignored by this endpoint.",
+            "schema": {
+              "type": "string"
+            }
           }
         ]
       }
@@ -592,6 +625,17 @@
           {
             "X402Payment": []
           }
+        ],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": false,
+            "description": "Reserved optional input field for future filters; currently ignored by this endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
         ]
       }
     },
@@ -663,6 +707,17 @@
           {
             "X402Payment": []
           }
+        ],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": false,
+            "description": "Reserved optional input field for future filters; currently ignored by this endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
         ]
       }
     },
@@ -670,7 +725,17 @@
       "get": {
         "summary": "List available commodities",
         "operationId": "fmp_commodities_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": false,
+            "description": "Reserved optional input field for future filters; currently ignored by this endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Provider data returned as JSON",
@@ -1398,7 +1463,17 @@
       "get": {
         "summary": "Industrial classification list",
         "operationId": "fmp_standard_industrial_classification_list",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": false,
+            "description": "Reserved optional input field for future filters; currently ignored by this endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Provider data returned as JSON",
@@ -1470,7 +1545,17 @@
       "get": {
         "summary": "Latest crowdfunding offerings",
         "operationId": "fmp_crowdfunding_offerings_latest",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": false,
+            "description": "Reserved optional input field for future filters; currently ignored by this endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Provider data returned as JSON",
@@ -1706,7 +1791,17 @@
       "get": {
         "summary": "Latest fundraising data",
         "operationId": "fmp_fundraising_latest",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": false,
+            "description": "Reserved optional input field for future filters; currently ignored by this endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Provider data returned as JSON",
@@ -1942,7 +2037,17 @@
       "get": {
         "summary": "Biggest market gainers",
         "operationId": "fmp_biggest_gainers",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": false,
+            "description": "Reserved optional input field for future filters; currently ignored by this endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Provider data returned as JSON",
@@ -2014,7 +2119,17 @@
       "get": {
         "summary": "Biggest market losers",
         "operationId": "fmp_biggest_losers",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": false,
+            "description": "Reserved optional input field for future filters; currently ignored by this endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Provider data returned as JSON",
@@ -2086,7 +2201,17 @@
       "get": {
         "summary": "Most actively traded stocks",
         "operationId": "fmp_most_actives",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": false,
+            "description": "Reserved optional input field for future filters; currently ignored by this endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Provider data returned as JSON",
@@ -2340,7 +2465,17 @@
       "get": {
         "summary": "Market hours for all exchanges",
         "operationId": "fmp_all_exchange_market_hours",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": false,
+            "description": "Reserved optional input field for future filters; currently ignored by this endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Provider data returned as JSON",
@@ -2700,7 +2835,17 @@
       "get": {
         "summary": "Market risk premium",
         "operationId": "fmp_market_risk_premium",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "input",
+            "in": "query",
+            "required": false,
+            "description": "Reserved optional input field for future filters; currently ignored by this endpoint.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Provider data returned as JSON",
