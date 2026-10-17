@@ -26,7 +26,6 @@ const routeRows = [
   ['/api/bea/trade', 0.01, 'BEA trade data', {year:'2026'}],
   ['/api/bea/international-investment', 0.01, 'BEA international investment', {year:'2026'}],
   ['/api/bea/gdp-by-industry', 0.01, 'BEA GDP by industry', {year:'2026'}],
-  ['/api/bea/regional', 0.01, 'BEA regional data', {year:'2026'}],
 ];
 const routes = Object.fromEntries(routeRows.map(([path, price, description, examples]) => [path, {path, price, description, examples}]));
 const requiredParams = {
