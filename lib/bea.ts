@@ -29,7 +29,7 @@ export async function getBeaData(request: Request, topic: BeaTopic) {
   upstream.searchParams.set("method", "GetData");
   upstream.searchParams.set("datasetname", config.dataset);
   upstream.searchParams.set("ResultFormat", "JSON");
-  upstream.searchParams.set("Year", input.searchParams.get("year") || "LAST5");
+  upstream.searchParams.set("Year", input.searchParams.get("year") || "2026");
 
   const table = input.searchParams.get("table") || config.table;
   const frequency = input.searchParams.get("frequency") || config.frequency;
