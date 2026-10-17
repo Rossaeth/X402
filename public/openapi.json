@@ -2363,6 +2363,13 @@
         "additionalProperties": true
       }
     },
-    "securitySchemes": {}
+    "securitySchemes": {
+      "X402Payment": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "PAYMENT-SIGNATURE",
+        "description": "x402 v2 payment authorization header for endpoints that explicitly require payment."
+      }
+    }
   }
 }
