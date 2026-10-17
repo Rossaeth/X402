@@ -3158,7 +3158,7 @@
             "description": "Year or BEA year range, such as LAST5 or 2024.",
             "schema": {
               "type": "string",
-              "default": "LAST5"
+              "default": "2026"
             }
           },
           {
@@ -3287,7 +3287,7 @@
             "description": "Year or BEA year range, such as LAST5 or 2024.",
             "schema": {
               "type": "string",
-              "default": "LAST5"
+              "default": "2026"
             }
           },
           {
@@ -3416,7 +3416,7 @@
             "description": "Year or BEA year range, such as LAST5 or 2024.",
             "schema": {
               "type": "string",
-              "default": "LAST5"
+              "default": "2026"
             }
           },
           {
@@ -3545,7 +3545,7 @@
             "description": "Year or BEA year range, such as LAST5 or 2024.",
             "schema": {
               "type": "string",
-              "default": "LAST5"
+              "default": "2026"
             }
           },
           {
@@ -3674,7 +3674,7 @@
             "description": "Year or BEA year range, such as LAST5 or 2024.",
             "schema": {
               "type": "string",
-              "default": "LAST5"
+              "default": "2026"
             }
           },
           {
@@ -3803,7 +3803,7 @@
             "description": "Year or BEA year range, such as LAST5 or 2024.",
             "schema": {
               "type": "string",
-              "default": "LAST5"
+              "default": "2026"
             }
           },
           {
@@ -3932,7 +3932,7 @@
             "description": "Year or BEA year range, such as LAST5 or 2024.",
             "schema": {
               "type": "string",
-              "default": "LAST5"
+              "default": "2026"
             }
           },
           {
@@ -4061,7 +4061,7 @@
             "description": "Year or BEA year range, such as LAST5 or 2024.",
             "schema": {
               "type": "string",
-              "default": "LAST5"
+              "default": "2026"
             }
           },
           {
