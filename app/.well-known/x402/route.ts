@@ -38,7 +38,15 @@ const resources = [
   "https://x402-sand.vercel.app/api/fmp/fundraising-search",
   "https://x402-sand.vercel.app/api/fmp/fundraising",
   "https://x402-sand.vercel.app/api/macro/calendar",
-  "https://x402-sand.vercel.app/api/macro/indicators"
+  "https://x402-sand.vercel.app/api/macro/indicators",
+  "https://x402-sand.vercel.app/api/bea/gdp",
+  "https://x402-sand.vercel.app/api/bea/inflation",
+  "https://x402-sand.vercel.app/api/bea/personal-income",
+  "https://x402-sand.vercel.app/api/bea/corporate-profits",
+  "https://x402-sand.vercel.app/api/bea/trade",
+  "https://x402-sand.vercel.app/api/bea/international-investment",
+  "https://x402-sand.vercel.app/api/bea/gdp-by-industry",
+  "https://x402-sand.vercel.app/api/bea/regional"
 ];
 
 export async function GET() {
