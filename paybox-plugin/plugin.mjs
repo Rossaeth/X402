@@ -18,33 +18,6 @@ const routeRows = [
   ['/api/etf/prices', 0.02, 'Crypto ETF prices', {}],
   ['/api/etf/weekly', 0.02, 'Weekly ETF analytics', {}],
   ['/api/etf/tickers', 0.02, 'Supported ETF tickers', {}],
-  ['/api/fmp/commodities-list', 0.01, 'FMP commodities list', {}],
-  ['/api/fmp/biggest-gainers', 0.01, 'Biggest market gainers', {}],
-  ['/api/fmp/biggest-losers', 0.01, 'Biggest market losers', {}],
-  ['/api/fmp/most-actives', 0.01, 'Most actively traded stocks', {}],
-  ['/api/fmp/exchange-market-hours', 0.01, 'Exchange market hours', {exchange:'NASDAQ'}],
-  ['/api/fmp/holidays-by-exchange', 0.01, 'Exchange holidays', {exchange:'NASDAQ',from:'2026-01-01',to:'2026-03-31'}],
-  ['/api/fmp/all-exchange-market-hours', 0.01, 'Market hours for all exchanges', {}],
-  ['/api/fmp/economics', 0.01, 'FMP economics data', {}],
-  ['/api/fmp/treasury-rates', 0.01, 'Treasury rates', {}],
-  ['/api/fmp/economic-indicators', 0.01, 'Economic indicators', {name:'GDP'}],
-  ['/api/fmp/market-risk-premium', 0.01, 'Market risk premium', {}],
-  ['/api/fmp/profile-cik', 0.01, 'Company profile by CIK', {cik:'0000320193'}],
-  ['/api/fmp/stock-peers', 0.01, 'Comparable stocks', {symbol:'AAPL'}],
-  ['/api/fmp/search-name', 0.01, 'Search companies by name', {query:'Apple'}],
-  ['/api/fmp/financial-reports-dates', 0.01, 'Financial report dates', {symbol:'AAPL'}],
-  ['/api/fmp/sec-filings-company-search/name', 0.01, 'Search SEC companies by name', {company:'Berkshire'}],
-  ['/api/fmp/sec-filings-company-search/symbol', 0.01, 'Search SEC companies by ticker', {symbol:'AAPL'}],
-  ['/api/fmp/sec-filings-company-search/cik', 0.01, 'Search SEC companies by CIK', {cik:'0000320193'}],
-  ['/api/fmp/sec-profile', 0.01, 'SEC company profile', {symbol:'AAPL'}],
-  ['/api/fmp/standard-industrial-classification-list', 0.01, 'Industrial classification list', {}],
-  ['/api/fmp/crowdfunding-offerings-latest', 0.01, 'Latest crowdfunding offerings', {page:'0',limit:'20'}],
-  ['/api/fmp/crowdfunding-offerings-search', 0.01, 'Search crowdfunding offerings', {name:'enotap'}],
-  ['/api/fmp/crowdfunding-offerings', 0.01, 'Crowdfunding offerings by CIK', {cik:'0001916078'}],
-  ['/api/fmp/fundraising-latest', 0.01, 'Latest fundraising data', {page:'0',limit:'10'}],
-  ['/api/fmp/fundraising-search', 0.01, 'Search fundraising data', {name:'NJOY'}],
-  ['/api/fmp/fundraising', 0.01, 'Fundraising data by CIK', {cik:'0001547416'}],
-  ['/api/macro/calendar', 0.01, 'Economic calendar', {from:'2026-01-01',to:'2026-01-31'}],
   ['/api/macro/indicators', 0.01, 'FRED macro indicators', {series:'DFF,DGS10,CPIAUCSL,UNRATE'}],
   ['/api/bea/gdp', 0.01, 'BEA GDP data', {year:'2026'}],
   ['/api/bea/inflation', 0.01, 'BEA PCE inflation', {year:'2026'}],
@@ -58,14 +31,6 @@ const routeRows = [
 const routes = Object.fromEntries(routeRows.map(([path, price, description, examples]) => [path, {path, price, description, examples}]));
 const requiredParams = {
   '/api/etf/flows':['asset'], '/api/etf/fund-flows':['asset'], '/api/etf/funds':['asset'],
-  '/api/macro/calendar':['from'], '/api/macro/indicators':['series'],
-  '/api/fmp/profile-cik':['cik'], '/api/fmp/stock-peers':['symbol'], '/api/fmp/search-name':['query'],
-  '/api/fmp/financial-reports-dates':['symbol'], '/api/fmp/sec-filings-company-search/name':['company'],
-  '/api/fmp/sec-filings-company-search/symbol':['symbol'], '/api/fmp/sec-filings-company-search/cik':['cik'],
-  '/api/fmp/sec-profile':['symbol'], '/api/fmp/crowdfunding-offerings-search':['name'],
-  '/api/fmp/crowdfunding-offerings':['cik'], '/api/fmp/fundraising-search':['name'], '/api/fmp/fundraising':['cik'],
-  '/api/fmp/exchange-market-hours':['exchange'], '/api/fmp/holidays-by-exchange':['exchange','from','to'],
-  '/api/fmp/economic-indicators':['name']
 };
 const tool = (name, description, properties = {}, required = []) => ({
   name, description,
@@ -88,7 +53,6 @@ const tools = [
   tool('propose_etf_fund_flows', 'For a buyer request, autonomously prepare this fund-level ETF flow URL, call PayBox native use_service with the exact URL and authorized wallet credential, wait for confirmed payment success, then call show_research_dashboard with the actual returned resource body. Do not ask the buyer to invoke the dashboard tool manually. The final result should be the interactive UI, not prose or raw JSON. This tool alone does not pay.', {asset:{type:'string',enum:['BTC','ETH','SOL','XRP','DOGE','LINK','AVAX','BNB','DOT','SUI'],default:'BTC'},network:{type:'string',enum:['base','solana'],default:'base'}}),
   tool('propose_etf_funds', 'For a buyer request, autonomously prepare this ETF funds URL, call PayBox native use_service with the exact URL and authorized wallet credential, wait for confirmed payment success, then call show_research_dashboard with the actual returned resource body. Do not ask the buyer to invoke the dashboard tool manually. The final result should be the interactive UI, not prose or raw JSON. This tool alone does not pay.', {asset:{type:'string',enum:['BTC','ETH','SOL','XRP','DOGE','LINK','AVAX','BNB','DOT','SUI'],default:'BTC'},network:{type:'string',enum:['base','solana'],default:'base'}}),
   tool('propose_etf_prices', 'For a buyer request, autonomously prepare this ETF prices URL, call PayBox native use_service with the exact URL and authorized wallet credential, wait for confirmed payment success, then call show_research_dashboard with the actual returned resource body. Do not ask the buyer to invoke the dashboard tool manually. The final result should be the interactive UI, not prose or raw JSON. This tool alone does not pay.', {network:{type:'string',enum:['base','solana'],default:'base'}}),
-  tool('propose_macro_calendar', 'For a buyer request, autonomously prepare this macro calendar URL, call PayBox native use_service with the exact URL and authorized wallet credential, wait for confirmed payment success, then call show_research_dashboard with the actual returned resource body. Do not ask the buyer to invoke the dashboard tool manually. The final result should be the interactive UI, not prose or raw JSON. This tool alone does not pay.', {from:string('Start date YYYY-MM-DD'),to:string('Optional end date YYYY-MM-DD'),network:{type:'string',enum:['base','solana'],default:'base'}}, ['from']),
   tool('propose_macro_indicators', 'For a buyer request, autonomously prepare this FRED macro-indicator URL, call PayBox native use_service with the exact URL and authorized wallet credential, wait for confirmed payment success, then call show_research_dashboard with the actual returned resource body. Do not ask the buyer to invoke the dashboard tool manually. The final result should be the interactive UI, not prose or raw JSON. This tool alone does not pay.', {series:string('Comma-separated FRED series IDs',{default:'DFF,DGS10,CPIAUCSL,UNRATE'}),network:{type:'string',enum:['base','solana'],default:'base'}}, ['series']),
 
   tool('show_research_dashboard', 'Render a paid research result as an interactive dashboard in MCP Apps-capable buyer clients. ETF dashboards also include a CryptoETF latest-daily-flows embed. Call this after the buyer client has fetched the actual endpoint result and payment is confirmed; pass the returned data without inventing or changing values. This tool does not fetch data or make payment.', {
@@ -182,7 +146,6 @@ async function callTool(name, args) {
     case 'propose_etf_fund_flows': return makeProposal('/api/etf/fund-flows', {asset:args.asset ?? 'BTC'}, args.network ?? 'base');
     case 'propose_etf_funds': return makeProposal('/api/etf/funds', {asset:args.asset ?? 'BTC'}, args.network ?? 'base');
     case 'propose_etf_prices': return makeProposal('/api/etf/prices', {}, args.network ?? 'base');
-    case 'propose_macro_calendar': return makeProposal('/api/macro/calendar', {from:args.from,...(args.to ? {to:args.to}: {})}, args.network ?? 'base');
     case 'propose_macro_indicators': return makeProposal('/api/macro/indicators', {series:args.series ?? 'DFF,DGS10,CPIAUCSL,UNRATE'}, args.network ?? 'base');
     default: throw new Error(`Unknown tool: ${name}`);
   }
