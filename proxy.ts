@@ -49,14 +49,14 @@ const routeDefinitions: Array<{ path: string; price: string; description: string
   { path: "/api/fmp/fundraising", price: "$0.01", description: "Fundraising data by CIK", queryParams: { cik: "0001547416" } },
   { path: "/api/macro/calendar", price: "$0.01", description: "Economic calendar", queryParams: { from: "2026-01-01", to: "2026-01-31" } },
   { path: "/api/macro/indicators", price: "$0.01", description: "FRED macro indicators", queryParams: { series: "DFF,DGS10,CPIAUCSL,UNRATE" } },
-  { path: "/api/bea/gdp", price: "$0.01", description: "BEA GDP data", queryParams: { year: "LAST5" } },
-  { path: "/api/bea/inflation", price: "$0.01", description: "BEA PCE inflation", queryParams: { year: "LAST5" } },
-  { path: "/api/bea/personal-income", price: "$0.01", description: "BEA personal income", queryParams: { year: "LAST5" } },
-  { path: "/api/bea/corporate-profits", price: "$0.01", description: "BEA corporate profits", queryParams: { year: "LAST5" } },
-  { path: "/api/bea/trade", price: "$0.01", description: "BEA trade data", queryParams: { year: "LAST5" } },
-  { path: "/api/bea/international-investment", price: "$0.01", description: "BEA international investment", queryParams: { year: "LAST5" } },
-  { path: "/api/bea/gdp-by-industry", price: "$0.01", description: "BEA GDP by industry", queryParams: { year: "LAST5" } },
-  { path: "/api/bea/regional", price: "$0.01", description: "BEA regional data", queryParams: { year: "LAST5" } }
+  { path: "/api/bea/gdp", price: "$0.01", description: "BEA GDP data", queryParams: { year: "2026" } },
+  { path: "/api/bea/inflation", price: "$0.01", description: "BEA PCE inflation", queryParams: { year: "2026" } },
+  { path: "/api/bea/personal-income", price: "$0.01", description: "BEA personal income", queryParams: { year: "2026" } },
+  { path: "/api/bea/corporate-profits", price: "$0.01", description: "BEA corporate profits", queryParams: { year: "2026" } },
+  { path: "/api/bea/trade", price: "$0.01", description: "BEA trade data", queryParams: { year: "2026", indicator: "BalGds" } },
+  { path: "/api/bea/international-investment", price: "$0.01", description: "BEA international investment", queryParams: { year: "2026" } },
+  { path: "/api/bea/gdp-by-industry", price: "$0.01", description: "BEA GDP by industry", queryParams: { year: "2026", tableid: "1", frequency: "A", industry: "ALL" } },
+  { path: "/api/bea/regional", price: "$0.01", description: "BEA regional data", queryParams: { year: "2026", geofips: "00000", linecode: "1" } }
 ];
 
 const requiredQueryParams: Record<string, string[]> = {
