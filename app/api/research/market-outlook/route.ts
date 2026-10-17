@@ -1,3 +1,0 @@
-import { jsonOk } from "@/lib/http";
-export const revalidate = 300;
-export async function GET() { return jsonOk({ title: "Crypto & Macro Market Outlook", status: "template", generated_at: new Date().toISOString(), summary: "Research summary is not generated until ETF and macro providers are connected.", sections: [{ topic: "ETF flows", status: "awaiting_provider", assets: ["BTC", "ETH", "SOL", "XRP"] }, { topic: "Institutional activity", status: "awaiting_provider", institution: "BlackRock / iShares" }, { topic: "Macro catalysts", status: "official_calendar_link", url: "https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm" }], disclaimer: "Informational research only; not investment advice." }, 300); }
