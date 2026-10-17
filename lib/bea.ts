@@ -4,16 +4,46 @@ export const dynamic = "force-dynamic";
 
 type BeaTopic = "gdp" | "inflation" | "personal-income" | "corporate-profits" | "trade" | "international-investment" | "gdp-by-industry" | "regional";
 
-const topics: Record<BeaTopic, { dataset: string; table?: string; frequency?: string; description: string }> = {
+type TopicConfig = {
+  dataset: string;
+  table?: string;
+  frequency?: string;
+  description: string;
+  defaults?: Record<string, string>;
+};
+
+const topics: Record<BeaTopic, TopicConfig> = {
   gdp: { dataset: "NIPA", table: "T10101", frequency: "Q", description: "Real GDP growth and gross domestic product" },
   inflation: { dataset: "NIPA", table: "T20304", frequency: "Q", description: "Personal consumption expenditures price indexes" },
   "personal-income": { dataset: "NIPA", table: "T20100", frequency: "Q", description: "Personal income and its disposition" },
   "corporate-profits": { dataset: "NIPA", table: "T11200", frequency: "Q", description: "National income by type of income, including corporate income" },
-  trade: { dataset: "ITA", description: "International transactions and trade-related data" },
+  trade: { dataset: "ITA", description: "International transactions and trade-related data", defaults: { Indicator: "BalGds" } },
   "international-investment": { dataset: "IIP", description: "International investment position" },
-  "gdp-by-industry": { dataset: "GDPbyIndustry", description: "Gross domestic product and value added by industry" },
-  regional: { dataset: "Regional", table: "CAINC1", description: "Regional personal income and related economic measures" }
+  "gdp-by-industry": { dataset: "GDPbyIndustry", description: "Gross domestic product and value added by industry", defaults: { TableID: "1", Frequency: "A", Industry: "ALL" } },
+  regional: { dataset: "Regional", table: "CAINC1", description: "Regional personal income and related economic measures", defaults: { GeoFIPS: "00000", LineCode: "1" } }
 };
+
+const allowedParameters: Record<string, string> = {
+  linecode: "LineCode",
+  geofips: "GeoFIPS",
+  industry: "Industry",
+  indicator: "Indicator",
+  areaorcountry: "AreaOrCountry",
+  directionofinvestment: "DirectionOfInvestment",
+  classification: "Classification",
+  component: "Component",
+  typeofinvestment: "TypeOfInvestment",
+  tableid: "TableID",
+  tablename: "TableName",
+  frequency: "Frequency"
+};
+
+function normalizeYear(value: string | null): string {
+  const year = value?.trim();
+  // BEA does not support the former LAST2/LAST5 aliases. X asks BEA for all available years.
+  if (!year || /^LAST\d+$/i.test(year)) return year?.toUpperCase() === "LAST2" || year?.toUpperCase() === "LAST5" ? "X" : "2026";
+  return year;
+}
 
 export async function getBeaData(request: Request, topic: BeaTopic) {
   const key = process.env.BEA_API_KEY;
@@ -29,37 +59,46 @@ export async function getBeaData(request: Request, topic: BeaTopic) {
   upstream.searchParams.set("method", "GetData");
   upstream.searchParams.set("datasetname", config.dataset);
   upstream.searchParams.set("ResultFormat", "JSON");
-  upstream.searchParams.set("Year", input.searchParams.get("year") || "2026");
+  upstream.searchParams.set("Year", normalizeYear(input.searchParams.get("year")));
 
   const table = input.searchParams.get("table") || config.table;
-  const frequency = input.searchParams.get("frequency") || config.frequency;
-  if (table) {
-    if (config.dataset === "Regional") upstream.searchParams.set("TableName", table);
-    else upstream.searchParams.set("TableName", table);
-  }
-  if (frequency) upstream.searchParams.set("Frequency", frequency);
+  if (table) upstream.searchParams.set(config.dataset === "GDPbyIndustry" ? "TableID" : "TableName", table);
+  if (config.frequency) upstream.searchParams.set("Frequency", input.searchParams.get("frequency") || config.frequency);
 
-  // Dataset-specific filters are forwarded only when explicitly supplied.
-  const allowed = ["LineCode", "GeoFIPS", "Industry", "Indicator", "AreaOrCountry", "DirectionOfInvestment", "Classification", "Component", "TypeOfInvestment"];
-  for (const name of allowed) {
-    const value = input.searchParams.get(name.toLowerCase());
-    if (value) upstream.searchParams.set(name, value);
+  for (const [queryName, apiName] of Object.entries(allowedParameters)) {
+    const value = input.searchParams.get(queryName);
+    if (value) upstream.searchParams.set(apiName, value);
+  }
+  for (const [name, value] of Object.entries(config.defaults ?? {})) {
+    if (!upstream.searchParams.has(name)) upstream.searchParams.set(name, value);
+  }
+
+  // ITA requires a specific Indicator or AreaOrCountry; do not send both by default.
+  if (config.dataset === "ITA" && upstream.searchParams.has("Indicator") && upstream.searchParams.has("AreaOrCountry")) {
+    return jsonError(400, "invalid_bea_parameters", "For BEA ITA data, provide either indicator or areaorcountry, not both.", {
+      provider: "BEA", parameters: ["indicator", "areaorcountry"]
+    });
   }
 
   try {
     const response = await fetch(upstream, { cache: "no-store" });
     const payload = await response.json().catch(() => null);
-    if (!response.ok) return jsonError(502, "bea_provider_error", "BEA returned an upstream HTTP error.", {
-      provider: "BEA", provider_status: response.status
-    });
-    const result = payload?.BEAAPI?.Results;
-    const errors = payload?.BEAAPI?.Error;
-    if (errors || !result) return jsonError(502, "bea_provider_error", "BEA rejected the query. Check the API key and dataset-specific parameters.", {
-      provider: "BEA", details: errors || payload?.BEAAPI
-    });
+    const api = payload?.BEAAPI;
+    const result = api?.Results;
+    const providerError = api?.Error ?? (result && !Array.isArray(result) ? result?.Error ?? result?.ErrorMsg : null);
+    if (!response.ok || providerError || !result) {
+      return jsonError(502, "bea_provider_error", "BEA rejected the query or has no data for the requested period. Check dataset parameters and data availability.", {
+        provider: "BEA",
+        provider_status: response.status,
+        details: providerError || result || api || payload
+      });
+    }
     return jsonOk({
-      success: true, source: "U.S. Bureau of Economic Analysis", topic,
-      dataset: config.dataset, description: config.description,
+      success: true,
+      source: "U.S. Bureau of Economic Analysis",
+      topic,
+      dataset: config.dataset,
+      description: config.description,
       retrieved_at: new Date().toISOString(),
       parameters: Object.fromEntries([...upstream.searchParams.entries()].filter(([name]) => name !== "UserID")),
       data: result
