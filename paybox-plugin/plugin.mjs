@@ -75,18 +75,18 @@ const tools = [
   tool('get_api_health', 'Check the live x402 ETF & Macro Intelligence API health endpoint. This is free and does not make a paid request.'),
   tool('list_research_endpoints', 'List available ETF, macro, and market research endpoints with stated per-request prices and required query parameters.'),
   tool('get_openapi_spec', 'Retrieve the live OpenAPI specification to inspect endpoint documentation. This is a free documentation request.'),
-  tool('propose_paid_research', 'Prepare a PayBox x402 payment proposal for one allowlisted paid ETF, macro, or FMP endpoint. PayBox must inspect the live HTTP 402 challenge and obtain the required user approval before payment. Choose Base or Solana explicitly. This tool does not itself pay or fetch the paid result.', {
+  tool('propose_paid_research', 'Prepare an allowlisted paid-resource URL for PayBox native use_service. After calling this tool, call PayBox use_service with the returned resource_url and an authorized wallet credential; PayBox handles the live x402 V2 challenge, approval, payment, and paid re-fetch. This tool does not pay.', {
     endpoint: {type:'string', enum:routeRows.map(r=>r[0]), description:'Exact paid endpoint path from list_research_endpoints.'},
     query: {type:'object', description:'Query parameters for the selected endpoint. Values must be strings, integers, or booleans; only simple query parameters are accepted.', additionalProperties:{oneOf:[{type:'string'},{type:'integer'},{type:'boolean'}]}},
     network: {type:'string', enum:['base','solana'], default:'base', description:'Payment network for the proposal. Defaults to Base USDC.'}
   }, ['endpoint']),
-  tool('propose_etf_summary', 'Propose a paid request for a cross-asset crypto ETF flow summary ($0.02 USDC). Does not itself pay or fetch the result.', {network:{type:'string',enum:['base','solana'],default:'base'} }),
-  tool('propose_etf_flows', 'Propose a paid ETF flow research request for an asset and lookback period ($0.02 USDC).', {asset:{type:'string',enum:['BTC','ETH','SOL','XRP','DOGE','LINK','AVAX','BNB','DOT','SUI'],default:'BTC'},period:{type:'string',default:'30d',pattern:'^[1-9][0-9]{0,2}d$'},network:{type:'string',enum:['base','solana'],default:'base'}}),
-  tool('propose_etf_fund_flows', 'Propose a paid fund-level ETF flow request ($0.02 USDC).', {asset:{type:'string',enum:['BTC','ETH','SOL','XRP','DOGE','LINK','AVAX','BNB','DOT','SUI'],default:'BTC'},network:{type:'string',enum:['base','solana'],default:'base'}}),
-  tool('propose_etf_funds', 'Propose a paid ETF fund data request ($0.02 USDC).', {asset:{type:'string',enum:['BTC','ETH','SOL','XRP','DOGE','LINK','AVAX','BNB','DOT','SUI'],default:'BTC'},network:{type:'string',enum:['base','solana'],default:'base'}}),
-  tool('propose_etf_prices', 'Propose a paid crypto ETF price data request ($0.02 USDC).', {network:{type:'string',enum:['base','solana'],default:'base'}}),
-  tool('propose_macro_calendar', 'Propose a paid macroeconomic calendar request ($0.01 USDC). Use YYYY-MM-DD dates.', {from:string('Start date YYYY-MM-DD'),to:string('Optional end date YYYY-MM-DD'),network:{type:'string',enum:['base','solana'],default:'base'}}, ['from']),
-  tool('propose_macro_indicators', 'Propose a paid FRED macro-indicator request ($0.01 USDC). Example series: DFF,DGS10,CPIAUCSL,UNRATE.', {series:string('Comma-separated FRED series IDs',{default:'DFF,DGS10,CPIAUCSL,UNRATE'}),network:{type:'string',enum:['base','solana'],default:'base'}}, ['series']),
+  tool('propose_etf_summary', 'Prepare the ETF summary resource URL. Then call PayBox native use_service with resource_url and an authorized wallet credential; PayBox handles x402 V2 payment and retrieval. This tool does not pay.', {network:{type:'string',enum:['base','solana'],default:'base'} }),
+  tool('propose_etf_flows', 'Prepare an ETF flow resource URL for an asset and lookback period. Then call PayBox native use_service with resource_url and an authorized wallet credential; PayBox handles x402 V2 payment and retrieval.', {asset:{type:'string',enum:['BTC','ETH','SOL','XRP','DOGE','LINK','AVAX','BNB','DOT','SUI'],default:'BTC'},period:{type:'string',default:'30d',pattern:'^[1-9][0-9]{0,2}d$'},network:{type:'string',enum:['base','solana'],default:'base'}}),
+  tool('propose_etf_fund_flows', 'Prepare a fund-level ETF flow resource URL. Then call PayBox native use_service with resource_url and an authorized wallet credential; PayBox handles x402 V2 payment and retrieval.', {asset:{type:'string',enum:['BTC','ETH','SOL','XRP','DOGE','LINK','AVAX','BNB','DOT','SUI'],default:'BTC'},network:{type:'string',enum:['base','solana'],default:'base'}}),
+  tool('propose_etf_funds', 'Prepare an ETF funds resource URL. Then call PayBox native use_service with resource_url and an authorized wallet credential; PayBox handles x402 V2 payment and retrieval.', {asset:{type:'string',enum:['BTC','ETH','SOL','XRP','DOGE','LINK','AVAX','BNB','DOT','SUI'],default:'BTC'},network:{type:'string',enum:['base','solana'],default:'base'}}),
+  tool('propose_etf_prices', 'Prepare an ETF prices resource URL. Then call PayBox native use_service with resource_url and an authorized wallet credential; PayBox handles x402 V2 payment and retrieval.', {network:{type:'string',enum:['base','solana'],default:'base'}}),
+  tool('propose_macro_calendar', 'Prepare a macroeconomic calendar resource URL using YYYY-MM-DD dates. Then call PayBox native use_service with resource_url and an authorized wallet credential; PayBox handles x402 V2 payment and retrieval.', {from:string('Start date YYYY-MM-DD'),to:string('Optional end date YYYY-MM-DD'),network:{type:'string',enum:['base','solana'],default:'base'}}, ['from']),
+  tool('propose_macro_indicators', 'Prepare a FRED macro-indicator resource URL. Then call PayBox native use_service with resource_url and an authorized wallet credential; PayBox handles x402 V2 payment and retrieval.', {series:string('Comma-separated FRED series IDs',{default:'DFF,DGS10,CPIAUCSL,UNRATE'}),network:{type:'string',enum:['base','solana'],default:'base'}}, ['series']),
 ];
 
 function rpcResponse(id, result) { return {jsonrpc:'2.0', id, result:{...result, resultType:'complete'}}; }
@@ -128,14 +128,18 @@ function makeProposal(path, query, network) {
   }
   if (params.period !== undefined && !/^[1-9][0-9]{0,2}d$/.test(String(params.period))) throw new Error('period must look like 7d or 30d.');
   if (network !== 'base' && network !== 'solana') throw new Error('network must be base or solana.');
-  const amount = String(Math.round(route.price * 1_000_000));
-  const proposal = {
-    version:'1', kind:'x402', expiresAt:new Date(Date.now() + 4 * 60 * 1000).toISOString(),
-    chain:network === 'base' ? 'eip155:8453' : 'solana:mainnet',
-    request:{url:queryUrl(path, params), method:'GET'},
-    payment:{asset:network === 'base' ? USDC_BASE : USDC_SOLANA, maxAmount:amount}
+  const resourceUrl = queryUrl(path, params);
+  return {
+    resource_url: resourceUrl,
+    method: 'GET',
+    endpoint: path,
+    stated_price_usd: route.price,
+    preferred_network: network === 'base' ? 'eip155:8453' : 'solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp',
+    payment_protocol: 'x402 v2',
+    next_action: 'Call PayBox native use_service with this exact resource_url and an authorized wallet credential. Let PayBox inspect the live 402 challenge and choose a supported accepted payment rail.',
+    paid: false,
+    note: 'This tool only prepares the resource URL. No payment was attempted and no paid data was fetched. The live 402 challenge is authoritative for price and accepted networks.'
   };
-  return {'io.paybox/transactionProposal':proposal, endpoint:path, stated_price_usd:route.price, network, note:'Proposal only. PayBox must validate the live HTTP 402 challenge and obtain approval; this tool has not paid or fetched paid data.'};
 }
 async function getJson(url) {
   const controller = new AbortController();
