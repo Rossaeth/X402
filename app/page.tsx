@@ -26,7 +26,8 @@ const endpointGroups = [
     title: "SYSTEM STATUS",
     description: "Service configuration and health checks.",
     endpoints: [
-      { method: "GET", path: "/api/health", label: "API Health", note: "Reports provider configuration status without exposing secrets." },
+      { method: "GET", path: "/api/health", label: "API Health", note: "Reports provider and x402 configuration without exposing secrets." },
+      { method: "GET", path: "/openapi.json", label: "OpenAPI Specification", note: "Machine-readable API description for agent integrations." },
     ],
   },
 ];
@@ -35,56 +36,76 @@ export default function Home() {
   return (
     <main className="shell">
       <header className="top terminal-header">
-        <div className="brand-lockup">
-          <div className="brand-mark">X</div>
+        <a className="brand-lockup" href="#" aria-label="ETF and Macro Intelligence home">
+          <div className="brand-mark">X<span>402</span></div>
           <div>
-            <div className="eyebrow">X402 / MARKET INTELLIGENCE</div>
-            <h1>ETF &amp; Macro Intelligence</h1>
-            <div className="muted header-subtitle">Institutional flows. Macro catalysts. Source-first research.</div>
+            <div className="eyebrow">INDEPENDENT MARKET RESEARCH / 001</div>
+            <h1>ETF <span className="title-amp">&amp;</span> Macro Intelligence</h1>
+            <div className="muted header-subtitle">Institutional flows. Macro catalysts. Agent-ready data.</div>
           </div>
-        </div>
+        </a>
         <div className="header-meta">
-          <span className="pill"><span className="status" /> RESEARCH TERMINAL</span>
-          <span className="small">DATA REFRESH · 60 SEC</span>
+          <span className="pill"><span className="status" /> X402 PAYMENT GATE</span>
+          <a className="header-link" href="#api-directory">Explore API <span>↘</span></a>
         </div>
       </header>
 
       <div className="market-strip">
-        <span><i /> ETF FLOW MONITOR</span><span>MACRO WATCHLIST</span><span>AGENT API</span><span className="market-strip-right">BASE / USDC · x402 READY-TO-INTEGRATE</span>
+        <span><i /> LIVE ETF MONITOR</span>
+        <span>US MACRO SERIES</span>
+        <span>AGENT API DIRECTORY</span>
+        <span className="market-strip-right">BASE + SOLANA / USDC · x402 V2</span>
       </div>
 
-      <LiveEtfDashboard />
+      <section className="hero-intro">
+        <div className="hero-copy">
+          <div className="section-kicker">MARKET DATA, BUILT FOR AGENTS</div>
+          <h2>Follow the flows.<br /><span>Understand the catalysts.</span></h2>
+          <p>Track crypto ETF flows alongside the macro indicators that shape risk markets. Explore the dashboard, then connect your agent to the same API.</p>
+          <div className="hero-actions">
+            <a className="primary-action" href="#live-data">Open live terminal <span>↘</span></a>
+            <a className="secondary-action" href="#api-directory">Browse endpoints</a>
+          </div>
+        </div>
+        <div className="hero-side" aria-label="Platform overview">
+          <div className="hero-orbit orbit-one" /><div className="hero-orbit orbit-two" /><div className="hero-core">X<span>402</span></div>
+          <div className="hero-side-label"><span className="status" /> PAY-PER-REQUEST API</div>
+          <div className="hero-side-foot"><span>01 / ETF FLOWS</span><span>02 / MACRO DATA</span><span>03 / AGENT ACCESS</span></div>
+        </div>
+      </section>
+
+      <div id="live-data"><LiveEtfDashboard /></div>
 
       <section className="cards">
         <article className="panel macro-panel">
-          <div className="section-kicker">01 / MACRO</div>
+          <div className="section-kicker">01 / CATALYSTS</div>
           <h2>Macro watchlist</h2>
-          <p className="muted small">Key catalysts monitored by macro and ETF researchers.</p>
+          <p className="muted small">The releases and policy signals most watched by macro and ETF researchers.</p>
           <div className="list">
-            <div className="item"><div><strong>FOMC</strong><div className="small">Federal Reserve meetings, policy decisions, and statements</div></div><span className="watch-tag">POLICY</span></div>
-            <div className="item"><div><strong>Inflation</strong><div className="small">CPI and PCE releases from official statistical series</div></div><span className="watch-tag">PRICES</span></div>
-            <div className="item"><div><strong>Employment</strong><div className="small">Nonfarm payrolls and unemployment rate</div></div><span className="watch-tag">LABOR</span></div>
-            <div className="item"><div><strong>Treasury yields</strong><div className="small">US 10-year yield and policy-rate indicators</div></div><span className="watch-tag">RATES</span></div>
+            <div className="item"><div><strong>Federal Reserve</strong><div className="small">FOMC decisions, policy guidance and rate expectations</div></div><span className="watch-tag">POLICY</span></div>
+            <div className="item"><div><strong>Inflation</strong><div className="small">CPI and PCE price trends from official data series</div></div><span className="watch-tag">PRICES</span></div>
+            <div className="item"><div><strong>Employment</strong><div className="small">Labor-market momentum and unemployment</div></div><span className="watch-tag">LABOR</span></div>
+            <div className="item"><div><strong>Treasury yields</strong><div className="small">US 10-year yield and short-term policy rates</div></div><span className="watch-tag">RATES</span></div>
           </div>
         </article>
         <article className="panel quick-panel">
-          <div className="section-kicker">02 / QUICK ACCESS</div>
-          <h2>Data shortcuts</h2>
-          <p className="muted small">Open live project endpoints directly.</p>
+          <div className="section-kicker">02 / SHORTCUTS</div>
+          <h2>Go straight to data</h2>
+          <p className="muted small">Direct links to live API routes and machine-readable documentation.</p>
           <div className="list quick-links">
-            <a href="/api/health"><span>API health</span><b>↗</b></a>
-            <a href="/api/etf/summary"><span>ETF flow summary</span><b>↗</b></a>
-            <a href="/api/etf/flows?asset=BTC"><span>BTC ETF flows</span><b>↗</b></a>
-            <a href="/api/macro/indicators?series=DFF,DGS10,CPIAUCSL,PCEPI,UNRATE"><span>US macro indicators</span><b>↗</b></a>
+            <a href="/api/health"><span><i className="shortcut-dot" /> API health</span><b>↗</b></a>
+            <a href="/api/etf/summary"><span><i className="shortcut-dot" /> ETF flow summary</span><b>↗</b></a>
+            <a href="/api/etf/flows?asset=BTC"><span><i className="shortcut-dot" /> BTC ETF flows</span><b>↗</b></a>
+            <a href="/openapi.json"><span><i className="shortcut-dot" /> OpenAPI specification</span><b>↗</b></a>
           </div>
         </article>
       </section>
 
       <section className="endpoint-section" id="api-directory">
         <div className="endpoint-heading">
-          <div className="section-kicker">03 / CONNECTIVITY</div>
+          <div className="section-kicker">03 / DEVELOPER ACCESS</div>
           <h2>Agent API Directory</h2>
-          <p className="muted">A concise route catalog for applications and AI agents. Provider credentials remain server-side. Only ETF, FRED macro-indicator, and system routes are listed here; legacy FMP routes are intentionally omitted from this directory.</p>
+          <p className="muted">A clear route catalog for scripts, applications and AI agents. Provider credentials remain server-side. This directory focuses on ETF data, FRED macro indicators and system documentation.</p>
         </div>
         <div className="endpoint-groups">
           {endpointGroups.map((group) => (
@@ -112,17 +133,17 @@ export default function Home() {
 
       <section className="panel paybox-guide" id="paybox-guide">
         <div className="section-kicker">04 / AGENT COMMERCE</div>
-        <h2>PayBox &amp; x402 integration guide</h2>
-        <p className="muted">Designed for agent-driven research workflows. Connect the API routes through your PayBox-compatible plugin or MCP server, then verify payment behavior before advertising an endpoint as paid.</p>
+        <h2>Built for PayBox and x402</h2>
+        <p className="muted">Use the API from a compatible agent or MCP plugin. Endpoints can return an x402 payment challenge before data is delivered, depending on their configured payment middleware.</p>
         <div className="guide-grid">
-          <div><span className="guide-number">01</span><strong>Connect the tool</strong><p className="small">Expose the required routes in your PayBox plugin or MCP tool manifest.</p></div>
-          <div><span className="guide-number">02</span><strong>Configure x402</strong><p className="small">Set the accepted network, USDC asset, recipient, price, and facilitator on the server.</p></div>
-          <div><span className="guide-number">03</span><strong>Test the challenge</strong><p className="small">Confirm an unpaid request returns HTTP 402 and a compatible agent can complete payment.</p></div>
+          <div><span className="guide-number">01</span><strong>Connect the tool</strong><p className="small">Expose the routes through your PayBox plugin or MCP tool manifest.</p></div>
+          <div><span className="guide-number">02</span><strong>Read the challenge</strong><p className="small">The server declares accepted networks, USDC amount, recipient and facilitator.</p></div>
+          <div><span className="guide-number">03</span><strong>Verify settlement</strong><p className="small">Confirm a paid request returns the expected data before treating a route as production-ready.</p></div>
         </div>
-        <div className="guide-notice"><strong>Integration status</strong><span>This website section is guidance only. Do not assume any route charges USDC unless its live x402 middleware has been verified end to end.</span></div>
+        <div className="guide-notice"><strong><span className="status" /> Live check</strong><span>HTTP 402 payment challenges were detected on the tested ETF summary and BEA inflation routes. Successful settlement and paid data delivery still require an end-to-end test.</span></div>
       </section>
 
-      <footer className="terminal-footer"><span>ETF &amp; MACRO INTELLIGENCE</span><span>RESEARCH USE ONLY · NOT INVESTMENT ADVICE</span><span>POWERED BY x402</span></footer>
+      <footer className="terminal-footer"><span>ETF &amp; MACRO INTELLIGENCE</span><span>RESEARCH USE ONLY · NOT INVESTMENT ADVICE</span><span>POWERED BY x402 V2</span></footer>
     </main>
   );
 }
