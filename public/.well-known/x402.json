@@ -3,8 +3,8 @@
   "provider": "x402-etf-macro-intelligence",
   "name": "X402 ETF & Macro Intelligence",
   "description": "Crypto ETF flows, fund data, market movers, and macroeconomic indicators for AI agents.",
-  "documentation": "https://x402-etf-macro-intelligence.vercel.app/openapi.json",
-  "homepage": "https://x402-etf-macro-intelligence.vercel.app",
+  "documentation": "https://x402-sand.vercel.app/openapi.json",
+  "homepage": "https://x402-sand.vercel.app",
   "status": "payment-integration-pending",
   "payment_enabled": false,
   "services": [
@@ -19,7 +19,7 @@
         "market-data",
         "research"
       ],
-      "endpoint_url": "https://x402-etf-macro-intelligence.vercel.app/api/etf/summary",
+      "endpoint_url": "https://x402-sand.vercel.app/api/etf/summary",
       "endpoints": [
         "/api/etf/summary",
         "/api/etf/flows?asset=BTC",
@@ -54,7 +54,7 @@
         "sec",
         "research"
       ],
-      "endpoint_url": "https://x402-etf-macro-intelligence.vercel.app/api/fmp/biggest-gainers",
+      "endpoint_url": "https://x402-sand.vercel.app/api/fmp/biggest-gainers",
       "endpoints": [
         "/api/fmp/commodities-list",
         "/api/fmp/biggest-gainers",
@@ -106,7 +106,7 @@
         "economic-indicators",
         "research"
       ],
-      "endpoint_url": "https://x402-etf-macro-intelligence.vercel.app/api/macro/indicators?series=DFF,DGS10,CPIAUCSL,UNRATE",
+      "endpoint_url": "https://x402-sand.vercel.app/api/macro/indicators?series=DFF,DGS10,CPIAUCSL,UNRATE",
       "endpoints": [
         "/api/macro/calendar",
         "/api/macro/indicators?series=DFF,DGS10,CPIAUCSL,UNRATE"
