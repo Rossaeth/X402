@@ -16,6 +16,19 @@ const endpointGroups = [
     ],
   },
   {
+    title: "BEA ECONOMIC DATA",
+    description: "US national accounts and economic statistics from the Bureau of Economic Analysis (BEA).",
+    endpoints: [
+      { method: "GET", path: "/api/bea/inflation", label: "Inflation & Prices", note: "BEA price and inflation indicators." },
+      { method: "GET", path: "/api/bea/gdp", label: "US GDP", note: "Gross domestic product statistics." },
+      { method: "GET", path: "/api/bea/gdp-by-industry", label: "GDP by Industry", note: "Economic output broken down by industry." },
+      { method: "GET", path: "/api/bea/personal-income", label: "Personal Income", note: "Personal income and related measures." },
+      { method: "GET", path: "/api/bea/corporate-profits", label: "Corporate Profits", note: "Corporate profits and business earnings measures." },
+      { method: "GET", path: "/api/bea/trade", label: "Trade", note: "International trade and related BEA measures." },
+      { method: "GET", path: "/api/bea/international-investment", label: "International Investment", note: "International investment position statistics." },
+    ],
+  },
+  {
     title: "MACRO INDICATORS",
     description: "Macroeconomic series sourced from the Federal Reserve Economic Data (FRED) API.",
     endpoints: [
