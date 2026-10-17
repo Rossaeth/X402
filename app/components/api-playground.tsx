@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type Result = { status: number; ok: boolean; body: string; elapsed: number };
 const endpointOptions = [
@@ -41,9 +41,26 @@ export default function ApiPlayground() {
     }
   }
 
+  useEffect(() => {
+    if (!playing) return;
+    const timer = window.setInterval(() => {
+      setStep((current) => {
+        if (current >= walkthrough.length - 1) {
+          setPlaying(false);
+          return 0;
+        }
+        return current + 1;
+      });
+    }, 2400);
+    return () => window.clearInterval(timer);
+  }, [playing]);
+
   function toggleWalkthrough() {
-    setPlaying((current) => !current);
-    if (!playing && step === walkthrough.length - 1) setStep(0);
+    if (playing) setPlaying(false);
+    else {
+      if (step === walkthrough.length - 1) setStep(0);
+      setPlaying(true);
+    }
   }
 
   return (
