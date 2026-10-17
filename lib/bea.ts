@@ -19,7 +19,7 @@ const topics: Record<BeaTopic, TopicConfig> = {
   "corporate-profits": { dataset: "NIPA", table: "T11200", frequency: "Q", description: "National income by type of income, including corporate income" },
   trade: { dataset: "ITA", description: "International transactions and trade-related data", defaults: { Indicator: "BalGds" } },
   "international-investment": { dataset: "IIP", description: "International investment position" },
-  "gdp-by-industry": { dataset: "GDPbyIndustry", description: "Gross domestic product and value added by industry", defaults: { TableID: "1", Frequency: "A", Industry: "ALL" } },
+  "gdp-by-industry": { dataset: "GDPbyIndustry", description: "Gross domestic product and value added by industry", defaults: { TableID: "1", Frequency: "Q", Industry: "ALL" } },
   regional: { dataset: "Regional", table: "CAINC1", description: "Regional personal income and related economic measures", defaults: { GeoFIPS: "00000", LineCode: "1" } }
 };
 
