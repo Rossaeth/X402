@@ -65,10 +65,11 @@ const requiredParams = {
   '/api/fmp/exchange-market-hours':['exchange'], '/api/fmp/holidays-by-exchange':['exchange','from','to'],
   '/api/fmp/economic-indicators':['name']
 };
-const tool = (name, description, properties = {}, required = []) => ({
+const tool = (name, description, properties = {}, required = [], ui = false) => ({
   name, description,
   inputSchema: {type:'object', properties, required, additionalProperties:false},
-  outputSchema: {type:'object', additionalProperties:true}
+  outputSchema: {type:'object', additionalProperties:true},
+  ...(ui ? {_meta:{ui:{resourceUri:'ui://x402-research/dashboard.html'}}} : {})
 });
 const string = (description, extra = {}) => ({type:'string', description, ...extra});
 const tools = [
@@ -87,12 +88,26 @@ const tools = [
   tool('propose_etf_prices', 'Prepare an ETF prices resource URL. Then call PayBox native use_service with resource_url and an authorized wallet credential; PayBox handles x402 V2 payment and retrieval.', {network:{type:'string',enum:['base','solana'],default:'base'}}),
   tool('propose_macro_calendar', 'Prepare a macroeconomic calendar resource URL using YYYY-MM-DD dates. Then call PayBox native use_service with resource_url and an authorized wallet credential; PayBox handles x402 V2 payment and retrieval.', {from:string('Start date YYYY-MM-DD'),to:string('Optional end date YYYY-MM-DD'),network:{type:'string',enum:['base','solana'],default:'base'}}, ['from']),
   tool('propose_macro_indicators', 'Prepare a FRED macro-indicator resource URL. Then call PayBox native use_service with resource_url and an authorized wallet credential; PayBox handles x402 V2 payment and retrieval.', {series:string('Comma-separated FRED series IDs',{default:'DFF,DGS10,CPIAUCSL,UNRATE'}),network:{type:'string',enum:['base','solana'],default:'base'}}, ['series']),
+  tool('render_research_dashboard', 'Render already-retrieved research data as an interactive ETF/Macro terminal widget when the MCP host supports MCP Apps. Pass only data returned by a successful endpoint call; this tool does not fetch paid data or make payments. In unsupported hosts it returns a readable text dashboard.', {
+    title:string('Dashboard title',{default:'ETF & Macro Intelligence'}),
+    endpoint:string('Source endpoint path'),
+    network:{type:'string',enum:['base','solana','free','unknown'],default:'unknown'},
+    paid_usd:{type:'number',minimum:0},
+    payment_status:{type:'string',enum:['succeeded','free','pending','failed','unknown'],default:'unknown'},
+    as_of:string('Source timestamp or reporting date'),
+    metrics:{type:'array',items:{type:'object',properties:{label:string('Metric label'),value:{type:['string','number']},change:{type:['string','number']},unit:string('Optional unit'),direction:{type:'string',enum:['up','down','flat','unknown']}},required:['label','value'],additionalProperties:false}},
+    series:{type:'array',items:{type:'object',properties:{label:string('X-axis label, e.g. date'),value:{type:'number'},group:string('Optional series group')},required:['label','value'],additionalProperties:false}},
+    rows:{type:'array',items:{type:'object',additionalProperties:{type:['string','number','boolean','null']}}},
+    notes:{type:'array',items:{type:'string'}}
+  }, ['endpoint'], true),
 ];
 
 function rpcResponse(id, result) { return {jsonrpc:'2.0', id, result:{...result, resultType:'complete'}}; }
 function rpcError(id, code, message) { return {jsonrpc:'2.0', id, error:{code, message}}; }
 function toolResult(value) {
-  const text = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
+  const text = value && typeof value === 'object' && typeof value.text_fallback === 'string'
+    ? value.text_fallback
+    : (typeof value === 'string' ? value : JSON.stringify(value, null, 2));
   return {content:[{type:'text',text}], structuredContent:value && typeof value === 'object' ? value : {result:value}, isError:false};
 }
 function parseObject(value, label) {
@@ -167,6 +182,78 @@ async function callTool(name, args) {
     case 'propose_etf_prices': return makeProposal('/api/etf/prices', {}, args.network ?? 'base');
     case 'propose_macro_calendar': return makeProposal('/api/macro/calendar', {from:args.from,...(args.to ? {to:args.to}: {})}, args.network ?? 'base');
     case 'propose_macro_indicators': return makeProposal('/api/macro/indicators', {series:args.series ?? 'DFF,DGS10,CPIAUCSL,UNRATE'}, args.network ?? 'base');
+    case 'render_research_dashboard': {
+      const metrics = Array.isArray(args.metrics) ? args.metrics.slice(0,12) : [];
+      const series = Array.isArray(args.series) ? args.series.slice(0,120) : [];
+      const rows = Array.isArray(args.rows) ? args.rows.slice(0,40) : [];
+      const notes = Array.isArray(args.notes) ? args.notes.slice(0,12).map(v => String(v).slice(0,500)) : [];
+      const dashboard = {
+        view:'x402-research-dashboard',
+        title:String(args.title || 'ETF & Macro Intelligence').slice(0,120),
+        endpoint:String(args.endpoint || 'unknown').slice(0,240),
+        network:args.network || 'unknown',
+        paid_usd:Number.isFinite(args.paid_usd) ? args.paid_usd : null,
+        payment_status:args.payment_status || 'unknown',
+        as_of:String(args.as_of || 'Not supplied').slice(0,120),
+        metrics:metrics.map(m=>({label:String(m.label||'Metric').slice(0,80),value:m.value,change:m.change,unit:m.unit?String(m.unit).slice(0,24):'',direction:m.direction||'unknown'})),
+        series:series.map(p=>({label:String(p.label||'').slice(0,40),value:Number(p.value),group:p.group?String(p.group).slice(0,40):''})).filter(p=>Number.isFinite(p.value)),
+        rows,notes
+      };
+      const lines = [
+        '# '+dashboard.title,
+        '**Source:** '+dashboard.endpoint+' · **As of:** '+dashboard.as_of,
+        '**Payment:** '+dashboard.payment_status+' · **Network:** '+dashboard.network+' · **Cost:** '+(dashboard.paid_usd===null?'not supplied':'
+  }
+}
+async function dispatch(msg) {
+  const {id,method,params={}} = msg || {};
+  if (method === 'initialize') return rpcResponse(id, {protocolVersion:params.protocolVersion || '2024-11-05',capabilities:{tools:{listChanged:false},resources:{listChanged:false},extensions:{'io.modelcontextprotocol/ui':{}}},serverInfo:{name:'x402-etf-macro-intelligence',version:'1.1.0'}});
+  if (method === 'ping') return rpcResponse(id, {});
+  if (method === 'tools/list') return rpcResponse(id, {tools});
+  if (method === 'tools/call') {
+    try { return rpcResponse(id, toolResult(await callTool(params.name, params.arguments || {}))); }
+    catch(e) { return rpcResponse(id, {content:[{type:'text',text:e instanceof Error ? e.message : 'Tool failed'}],isError:true,resultType:'complete'}); }
+  }
+  if (method === 'resources/list') return rpcResponse(id, {resources:[{uri:'ui://x402-research/dashboard.html',name:'ETF & Macro Research Dashboard',description:'Interactive terminal view for structured research results',mimeType:'text/html;profile=mcp-app'}]});
+  if (method === 'resources/read') {
+    const uri = params?.uri;
+    if (uri !== 'ui://x402-research/dashboard.html') return rpcError(id,-32602,'Unknown resource URI');
+    return rpcResponse(id,{contents:[{uri,mimeType:'text/html;profile=mcp-app',text:dashboardHtml,_meta:{ui:{prefersBorder:true}}}]});
+  }
+  if (method === 'prompts/list') return rpcResponse(id, {prompts:[]});
+  if (method?.startsWith('notifications/')) return null;
+  return rpcError(id ?? null, -32601, `Method not found: ${method}`);
+}
+let buffer = '';
+process.stdin.setEncoding('utf8');
+process.stdin.on('data', chunk => {
+  buffer += chunk;
+  if (buffer.length > 1024 * 1024) { process.stderr.write('Input buffer exceeded 1 MiB.\n'); process.exit(1); }
+  let index;
+  while ((index = buffer.indexOf('\n')) >= 0) {
+    const line = buffer.slice(0,index).trim(); buffer = buffer.slice(index+1);
+    if (!line) continue;
+    (async () => {
+      let message;
+      try { message = JSON.parse(line); } catch { process.stdout.write(JSON.stringify(rpcError(null,-32700,'Parse error'))+'\n'); return; }
+      if (message.id === undefined && message.method?.startsWith('notifications/')) return;
+      const result = await dispatch(message);
+      if (result) process.stdout.write(JSON.stringify(result)+'\n');
+    })().catch(e => process.stderr.write(`Dispatch error: ${e?.message || 'unknown'}\n`));
+  }
+});
+process.stdin.on('end', () => { if (buffer.trim()) process.stderr.write('Ignored incomplete final JSON line.\n'); });
++dashboard.paid_usd.toFixed(2)+' USDC'),
+        '',
+        ...dashboard.metrics.map(m=>'- **'+m.label+':** '+m.value+(m.unit?' '+m.unit:'')+(m.change!==undefined?' · Change: '+m.change:'')),
+        ...(dashboard.series.length?['','**Chart data**',...dashboard.series.slice(-20).map(p=>'- '+p.label+': '+p.value)]:[]),
+        ...(dashboard.rows.length?['','**Data table**',JSON.stringify(dashboard.rows.slice(0,12),null,2)]:[]),
+        ...(dashboard.notes.length?['','**Notes**',...dashboard.notes.map(n=>'- '+n)]:[]),
+        '',
+        '_Research information only; not investment advice._'
+      ];
+      return { ...dashboard, text_fallback:lines.join('\\n') };
+    }
     default: throw new Error(`Unknown tool: ${name}`);
   }
 }
