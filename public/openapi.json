@@ -3,7 +3,7 @@
   "info": {
     "title": "X402 ETF & Macro Intelligence API",
     "version": "1.0.0",
-    "description": "API for crypto ETF flows and macroeconomic data for AI agents. Paid-route metadata is declared below; runtime x402 payment enforcement must be deployed and verified before charges are enabled. Support: rossadi.ardian@gmail.com.",
+    "description": "API for crypto ETF flows, FMP market data, FRED macroeconomic indicators, and BEA economic statistics for AI agents. Paid endpoints use x402.",
     "contact": {
       "name": "API Support",
       "url": "https://x402-sand.vercel.app",
@@ -3144,6 +3144,1038 @@
           }
         },
         "security": []
+      }
+    },
+    "/api/bea/gdp": {
+      "get": {
+        "summary": "BEA GDP data",
+        "operationId": "bea_gdp",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "description": "Year or BEA year range, such as LAST5 or 2024.",
+            "schema": {
+              "type": "string",
+              "default": "LAST5"
+            }
+          },
+          {
+            "name": "frequency",
+            "in": "query",
+            "required": false,
+            "description": "Dataset frequency where supported (A, Q, or M).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "table",
+            "in": "query",
+            "required": false,
+            "description": "BEA table name override where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "linecode",
+            "in": "query",
+            "required": false,
+            "description": "BEA table line code where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "geofips",
+            "in": "query",
+            "required": false,
+            "description": "Regional GeoFIPS filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "industry",
+            "in": "query",
+            "required": false,
+            "description": "Industry filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time-series observations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "security": [
+          {
+            "X402Payment": []
+          }
+        ],
+        "description": "Queries the official U.S. Bureau of Economic Analysis API. Requires BEA_API_KEY configured on the server."
+      }
+    },
+    "/api/bea/inflation": {
+      "get": {
+        "summary": "BEA PCE inflation price indexes",
+        "operationId": "bea_inflation",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "description": "Year or BEA year range, such as LAST5 or 2024.",
+            "schema": {
+              "type": "string",
+              "default": "LAST5"
+            }
+          },
+          {
+            "name": "frequency",
+            "in": "query",
+            "required": false,
+            "description": "Dataset frequency where supported (A, Q, or M).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "table",
+            "in": "query",
+            "required": false,
+            "description": "BEA table name override where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "linecode",
+            "in": "query",
+            "required": false,
+            "description": "BEA table line code where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "geofips",
+            "in": "query",
+            "required": false,
+            "description": "Regional GeoFIPS filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "industry",
+            "in": "query",
+            "required": false,
+            "description": "Industry filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time-series observations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "security": [
+          {
+            "X402Payment": []
+          }
+        ],
+        "description": "Queries the official U.S. Bureau of Economic Analysis API. Requires BEA_API_KEY configured on the server."
+      }
+    },
+    "/api/bea/personal-income": {
+      "get": {
+        "summary": "BEA personal income and spending",
+        "operationId": "bea_personal_income",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "description": "Year or BEA year range, such as LAST5 or 2024.",
+            "schema": {
+              "type": "string",
+              "default": "LAST5"
+            }
+          },
+          {
+            "name": "frequency",
+            "in": "query",
+            "required": false,
+            "description": "Dataset frequency where supported (A, Q, or M).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "table",
+            "in": "query",
+            "required": false,
+            "description": "BEA table name override where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "linecode",
+            "in": "query",
+            "required": false,
+            "description": "BEA table line code where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "geofips",
+            "in": "query",
+            "required": false,
+            "description": "Regional GeoFIPS filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "industry",
+            "in": "query",
+            "required": false,
+            "description": "Industry filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time-series observations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "security": [
+          {
+            "X402Payment": []
+          }
+        ],
+        "description": "Queries the official U.S. Bureau of Economic Analysis API. Requires BEA_API_KEY configured on the server."
+      }
+    },
+    "/api/bea/corporate-profits": {
+      "get": {
+        "summary": "BEA corporate profits and national income",
+        "operationId": "bea_corporate_profits",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "description": "Year or BEA year range, such as LAST5 or 2024.",
+            "schema": {
+              "type": "string",
+              "default": "LAST5"
+            }
+          },
+          {
+            "name": "frequency",
+            "in": "query",
+            "required": false,
+            "description": "Dataset frequency where supported (A, Q, or M).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "table",
+            "in": "query",
+            "required": false,
+            "description": "BEA table name override where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "linecode",
+            "in": "query",
+            "required": false,
+            "description": "BEA table line code where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "geofips",
+            "in": "query",
+            "required": false,
+            "description": "Regional GeoFIPS filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "industry",
+            "in": "query",
+            "required": false,
+            "description": "Industry filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time-series observations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "security": [
+          {
+            "X402Payment": []
+          }
+        ],
+        "description": "Queries the official U.S. Bureau of Economic Analysis API. Requires BEA_API_KEY configured on the server."
+      }
+    },
+    "/api/bea/trade": {
+      "get": {
+        "summary": "BEA international transactions and trade-related data",
+        "operationId": "bea_trade",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "description": "Year or BEA year range, such as LAST5 or 2024.",
+            "schema": {
+              "type": "string",
+              "default": "LAST5"
+            }
+          },
+          {
+            "name": "frequency",
+            "in": "query",
+            "required": false,
+            "description": "Dataset frequency where supported (A, Q, or M).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "table",
+            "in": "query",
+            "required": false,
+            "description": "BEA table name override where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "linecode",
+            "in": "query",
+            "required": false,
+            "description": "BEA table line code where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "geofips",
+            "in": "query",
+            "required": false,
+            "description": "Regional GeoFIPS filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "industry",
+            "in": "query",
+            "required": false,
+            "description": "Industry filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time-series observations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "security": [
+          {
+            "X402Payment": []
+          }
+        ],
+        "description": "Queries the official U.S. Bureau of Economic Analysis API. Requires BEA_API_KEY configured on the server."
+      }
+    },
+    "/api/bea/international-investment": {
+      "get": {
+        "summary": "BEA international investment position",
+        "operationId": "bea_international_investment",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "description": "Year or BEA year range, such as LAST5 or 2024.",
+            "schema": {
+              "type": "string",
+              "default": "LAST5"
+            }
+          },
+          {
+            "name": "frequency",
+            "in": "query",
+            "required": false,
+            "description": "Dataset frequency where supported (A, Q, or M).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "table",
+            "in": "query",
+            "required": false,
+            "description": "BEA table name override where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "linecode",
+            "in": "query",
+            "required": false,
+            "description": "BEA table line code where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "geofips",
+            "in": "query",
+            "required": false,
+            "description": "Regional GeoFIPS filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "industry",
+            "in": "query",
+            "required": false,
+            "description": "Industry filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time-series observations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "security": [
+          {
+            "X402Payment": []
+          }
+        ],
+        "description": "Queries the official U.S. Bureau of Economic Analysis API. Requires BEA_API_KEY configured on the server."
+      }
+    },
+    "/api/bea/gdp-by-industry": {
+      "get": {
+        "summary": "BEA GDP and value added by industry",
+        "operationId": "bea_gdp_by_industry",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "description": "Year or BEA year range, such as LAST5 or 2024.",
+            "schema": {
+              "type": "string",
+              "default": "LAST5"
+            }
+          },
+          {
+            "name": "frequency",
+            "in": "query",
+            "required": false,
+            "description": "Dataset frequency where supported (A, Q, or M).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "table",
+            "in": "query",
+            "required": false,
+            "description": "BEA table name override where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "linecode",
+            "in": "query",
+            "required": false,
+            "description": "BEA table line code where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "geofips",
+            "in": "query",
+            "required": false,
+            "description": "Regional GeoFIPS filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "industry",
+            "in": "query",
+            "required": false,
+            "description": "Industry filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time-series observations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "security": [
+          {
+            "X402Payment": []
+          }
+        ],
+        "description": "Queries the official U.S. Bureau of Economic Analysis API. Requires BEA_API_KEY configured on the server."
+      }
+    },
+    "/api/bea/regional": {
+      "get": {
+        "summary": "BEA regional economic data",
+        "operationId": "bea_regional",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "description": "Year or BEA year range, such as LAST5 or 2024.",
+            "schema": {
+              "type": "string",
+              "default": "LAST5"
+            }
+          },
+          {
+            "name": "frequency",
+            "in": "query",
+            "required": false,
+            "description": "Dataset frequency where supported (A, Q, or M).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "table",
+            "in": "query",
+            "required": false,
+            "description": "BEA table name override where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "linecode",
+            "in": "query",
+            "required": false,
+            "description": "BEA table line code where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "geofips",
+            "in": "query",
+            "required": false,
+            "description": "Regional GeoFIPS filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "industry",
+            "in": "query",
+            "required": false,
+            "description": "Industry filter where supported.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Time-series observations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiSuccess"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or missing input parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required. The deployed server must return a valid x402 v2 challenge with a non-empty accepts array and Bazaar input schema.",
+            "headers": {
+              "PAYMENT-REQUIRED": {
+                "description": "Base64-encoded x402 v2 payment requirements",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/X402PaymentRequired"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Provider configuration or upstream service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          }
+        },
+        "x-payment-info": {
+          "protocols": [
+            "x402"
+          ],
+          "price": {
+            "mode": "fixed",
+            "currency": "USD",
+            "amount": "0.01"
+          }
+        },
+        "security": [
+          {
+            "X402Payment": []
+          }
+        ],
+        "description": "Queries the official U.S. Bureau of Economic Analysis API. Requires BEA_API_KEY configured on the server."
       }
     }
   },
