@@ -20,7 +20,6 @@ const resources = [
   "https://x402-sand.vercel.app/api/bea/trade",
   "https://x402-sand.vercel.app/api/bea/international-investment",
   "https://x402-sand.vercel.app/api/bea/gdp-by-industry",
-  "https://x402-sand.vercel.app/api/bea/regional"
 ];
 
 export async function GET() {
