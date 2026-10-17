@@ -1,3 +1,5 @@
+import ApiPlayground from "@/app/components/api-playground";
+
 const endpointGroups = [
   {
     title: "ETF DATA",
@@ -60,6 +62,18 @@ export default function Home() {
           <a className="header-link" href="/openapi.json">OpenAPI ↗</a>
         </div>
       </header>
+
+      <section className="hero-intro compact-hero">
+        <div className="hero-copy">
+          <div className="section-kicker">PAY-PER-REQUEST DATA</div>
+          <h2>Research APIs.<br /><span>Ready for agents.</span></h2>
+          <p>Explore ETF flows and US macro data through direct endpoints. Test requests, inspect real responses, and follow the x402 payment flow when a route is protected.</p>
+          <div className="hero-actions"><a className="primary-action" href="#api-playground">Try an API call ↘</a><a className="secondary-action" href="#api-directory">Browse endpoints</a></div>
+        </div>
+        <div className="hero-side" aria-label="API flow illustration"><div className="hero-orbit orbit-one" /><div className="hero-orbit orbit-two" /><div className="hero-core">X<span>402</span></div><div className="hero-side-label"><span className="status" /> PAYMENT-AWARE API</div><div className="hero-side-foot"><span>01 / REQUEST</span><span>02 / SETTLE</span><span>03 / DATA</span></div></div>
+      </section>
+
+      <ApiPlayground />
 
       <section className="endpoint-section" id="api-directory">
         <div className="endpoint-heading">
