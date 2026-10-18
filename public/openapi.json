@@ -8,11 +8,12 @@
       "name": "API Support",
       "url": "https://x402-sand.vercel.app",
       "email": "darmauyeee@gmail.com"
-    }
+    },
+    "x-guidance": "Use this API when an agent needs crypto ETF flow summaries, ETF sentiment, Federal Reserve event context, or U.S. macroeconomic indicators for market research. Inputs are endpoint-specific query parameters such as asset/ticker, date range, year, frequency, or limit; consult each operation's parameters and schemas and send only supported values. Successful calls return structured JSON with provider data and endpoint-specific metadata. Treat missing-provider and upstream errors as unavailable data; never infer or fabricate missing values. Paid operations use x402: first make the request without payment, inspect the HTTP 402 challenge for the exact price, accepted network and payment requirements, then retry with a compatible payment authorization. Do not assume all endpoints have the same price or supported chains. Use the response schema to parse results; cite timestamps and source/provider fields when present. Call summary endpoints for broad overviews and focused macro/BEA endpoints for a specific indicator or reporting period."
   },
   "servers": [
     {
-      "url": "https://x402-sand.vercel.app"
+      "url": "https://x402-etf-macro-intelligence.vercel.app"
     }
   ],
   "paths": {
